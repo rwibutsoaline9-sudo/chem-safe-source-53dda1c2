@@ -18,6 +18,7 @@ import Products from "./pages/Products";
 import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import { WhatsAppButton } from "./components/WhatsAppButton";
 import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
@@ -30,6 +31,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <Header />
     <main className="flex-1">{children}</main>
     <Footer />
+    <WhatsAppButton />
   </div>
 );
 

@@ -18,7 +18,7 @@ const About = () => {
         <div className="container mx-auto px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">About ChemSupply Pro</h1>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl">
-            Leading global supplier of industrial chemicals with over 20 years of excellence
+            Trusted B2B supplier of industrial chemicals headquartered in St Paul, MN — serving businesses across the Minneapolis–St. Paul metro and worldwide since 2003.
           </p>
         </div>
       </section>

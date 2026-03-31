@@ -184,9 +184,9 @@ export default function TermsOfService() {
                 For questions about these Terms of Service, please contact us:
               </p>
               <ul className="list-none space-y-2 text-sm sm:text-base text-muted-foreground">
-                <li><strong>Email:</strong> legal@chemsupplypro.com</li>
-                <li><strong>Phone:</strong> +1 (555) 123-4567</li>
-                <li><strong>Address:</strong> 123 Industrial Parkway, Chemical District, CD 12345</li>
+                <li><strong>Email:</strong> support@drchems.com</li>
+                <li><strong>Phone:</strong> +1 (612) 293-1250</li>
+                <li><strong>Address:</strong> 30 E 7th St, St Paul, MN 55101, United States</li>
               </ul>
             </div>
 

@@ -268,9 +268,9 @@ export default function ShippingPolicy() {
                 For shipping inquiries or special requests:
               </p>
               <ul className="list-none space-y-2 text-sm sm:text-base text-muted-foreground">
-                <li><strong>Shipping Department:</strong> shipping@chemsupplypro.com</li>
-                <li><strong>Phone:</strong> +1 (555) 123-4567 ext. 2</li>
-                <li><strong>Hours:</strong> Monday-Friday, 8:00 AM - 5:00 PM EST</li>
+                <li><strong>Shipping Department:</strong> support@drchems.com</li>
+                <li><strong>Phone / WhatsApp:</strong> +1 (612) 293-1250</li>
+                <li><strong>Hours:</strong> Monday–Friday, 8:00 AM – 5:00 PM CST</li>
               </ul>
             </div>
 

@@ -234,10 +234,9 @@ export default function PrivacyPolicy() {
                 For questions or concerns about this Privacy Policy or our data practices, please contact:
               </p>
               <ul className="list-none space-y-2 text-sm sm:text-base text-muted-foreground">
-                <li><strong>Privacy Officer:</strong> privacy@chemsupplypro.com</li>
-                <li><strong>Email:</strong> support@chemsupplypro.com</li>
-                <li><strong>Phone:</strong> +1 (555) 123-4567</li>
-                <li><strong>Address:</strong> 123 Industrial Parkway, Chemical District, CD 12345</li>
+                <li><strong>Email:</strong> support@drchems.com</li>
+                <li><strong>Phone:</strong> +1 (612) 293-1250</li>
+                <li><strong>Address:</strong> 30 E 7th St, St Paul, MN 55101, United States</li>
               </ul>
             </div>
 

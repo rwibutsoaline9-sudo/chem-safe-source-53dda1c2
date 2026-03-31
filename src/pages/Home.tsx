@@ -75,26 +75,41 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Why Choose ChemSupply Pro?</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-10 md:mt-12">
-              <div className="text-center sm:text-left">
+            <p className="text-sm sm:text-base text-muted-foreground mb-8">
+              Headquartered at 30 E 7th St, St Paul, MN 55101 — serving verified businesses since 2003.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+              <div className="text-center">
                 <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Quality Assurance</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Every batch tested and certified to meet international standards
+                  ISO 9001:2015 certified. Every batch tested with COA & SDS documentation provided.
                 </p>
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center">
                 <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Compliance First</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Full SDS documentation and regulatory compliance for all products
+                  GMP compliant, FDA registered facility. Full regulatory compliance for all products.
                 </p>
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center">
                 <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Expert Support</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Technical guidance and customer service from industry specialists
+                  Call +1 (612) 293-1250 or WhatsApp us. Technical guidance from industry specialists.
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-6 sm:py-8 bg-background border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10 text-xs sm:text-sm text-muted-foreground">
+            <span className="font-semibold">✓ ISO 9001:2015</span>
+            <span className="font-semibold">✓ GMP Certified</span>
+            <span className="font-semibold">✓ FDA Registered</span>
+            <span className="font-semibold">✓ SDS & COA Provided</span>
+            <span className="font-semibold">✓ B2B Verified Only</span>
           </div>
         </div>
       </section>

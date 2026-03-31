@@ -14,6 +14,236 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          business_name: string
+          contact_name: string
+          created_at: string | null
+          document_url: string | null
+          email: string
+          id: string
+          message: string | null
+          phone: string
+          product: string
+          quantity: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_name: string
+          contact_name: string
+          created_at?: string | null
+          document_url?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          phone: string
+          product: string
+          quantity: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_name?: string
+          contact_name?: string
+          created_at?: string | null
+          document_url?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          product?: string
+          quantity?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contact_settings: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_email: string
+          sender_email: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_email: string
+          sender_email: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_email?: string
+          sender_email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_settings: {
+        Row: {
+          adsense_publisher_id: string | null
+          allow_indexing: boolean
+          created_at: string
+          default_meta_description: string | null
+          ga4_measurement_id: string | null
+          google_ads_id: string | null
+          google_site_verification: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          adsense_publisher_id?: string | null
+          allow_indexing?: boolean
+          created_at?: string
+          default_meta_description?: string | null
+          ga4_measurement_id?: string | null
+          google_ads_id?: string | null
+          google_site_verification?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          adsense_publisher_id?: string | null
+          allow_indexing?: boolean
+          created_at?: string
+          default_meta_description?: string | null
+          ga4_measurement_id?: string | null
+          google_ads_id?: string | null
+          google_site_verification?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          quantity: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_email: string | null
+          id: string
+          metadata: Json | null
+          payment_intent_id: string | null
+          payment_provider: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          payment_provider?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_intent_id?: string | null
+          payment_provider?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_settings: {
+        Row: {
+          created_at: string
+          crypto_api_key: string | null
+          crypto_enabled: boolean
+          crypto_provider: string | null
+          id: string
+          paypal_client_id: string | null
+          paypal_enabled: boolean
+          paypal_secret: string | null
+          stripe_enabled: boolean
+          stripe_public_key: string | null
+          stripe_secret_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crypto_api_key?: string | null
+          crypto_enabled?: boolean
+          crypto_provider?: string | null
+          id?: string
+          paypal_client_id?: string | null
+          paypal_enabled?: boolean
+          paypal_secret?: string | null
+          stripe_enabled?: boolean
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crypto_api_key?: string | null
+          crypto_enabled?: boolean
+          crypto_provider?: string | null
+          id?: string
+          paypal_client_id?: string | null
+          paypal_enabled?: boolean
+          paypal_secret?: string | null
+          stripe_enabled?: boolean
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           applications: string[] | null
@@ -94,6 +324,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          external_id: string | null
+          id: string
+          order_id: string
+          provider: string
+          raw: Json | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          external_id?: string | null
+          id?: string
+          order_id: string
+          provider: string
+          raw?: Json | null
+          status: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          external_id?: string | null
+          id?: string
+          order_id?: string
+          provider?: string
+          raw?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

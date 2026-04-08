@@ -23,6 +23,8 @@ import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import Settings from "./pages/admin/Settings";
+import StripeSettings from "./pages/admin/StripeSettings";
+import Payments from "./pages/admin/Payments";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +66,8 @@ const App = () => {
             <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
             <Route path="/admin/bulk-import" element={<ProtectedRoute><BulkImport /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/admin/stripe-settings" element={<ProtectedRoute><StripeSettings /></ProtectedRoute>} />
+            <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

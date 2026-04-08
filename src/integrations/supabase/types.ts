@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           business_name: string
@@ -162,7 +189,9 @@ export type Database = {
           created_at: string
           currency: string
           customer_email: string | null
+          fraud_flag: string | null
           id: string
+          ip_address: string | null
           metadata: Json | null
           payment_intent_id: string | null
           payment_provider: string | null
@@ -175,7 +204,9 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_email?: string | null
+          fraud_flag?: string | null
           id?: string
+          ip_address?: string | null
           metadata?: Json | null
           payment_intent_id?: string | null
           payment_provider?: string | null
@@ -188,7 +219,9 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_email?: string | null
+          fraud_flag?: string | null
           id?: string
+          ip_address?: string | null
           metadata?: Json | null
           payment_intent_id?: string | null
           payment_provider?: string | null
@@ -206,13 +239,17 @@ export type Database = {
           crypto_enabled: boolean
           crypto_provider: string | null
           id: string
+          one_time_enabled: boolean
           paypal_client_id: string | null
           paypal_enabled: boolean
           paypal_secret: string | null
           stripe_enabled: boolean
+          stripe_mode: string
           stripe_public_key: string | null
           stripe_secret_key: string | null
+          subscriptions_enabled: boolean
           updated_at: string
+          webhook_secret: string | null
         }
         Insert: {
           created_at?: string
@@ -220,13 +257,17 @@ export type Database = {
           crypto_enabled?: boolean
           crypto_provider?: string | null
           id?: string
+          one_time_enabled?: boolean
           paypal_client_id?: string | null
           paypal_enabled?: boolean
           paypal_secret?: string | null
           stripe_enabled?: boolean
+          stripe_mode?: string
           stripe_public_key?: string | null
           stripe_secret_key?: string | null
+          subscriptions_enabled?: boolean
           updated_at?: string
+          webhook_secret?: string | null
         }
         Update: {
           created_at?: string
@@ -234,13 +275,17 @@ export type Database = {
           crypto_enabled?: boolean
           crypto_provider?: string | null
           id?: string
+          one_time_enabled?: boolean
           paypal_client_id?: string | null
           paypal_enabled?: boolean
           paypal_secret?: string | null
           stripe_enabled?: boolean
+          stripe_mode?: string
           stripe_public_key?: string | null
           stripe_secret_key?: string | null
+          subscriptions_enabled?: boolean
           updated_at?: string
+          webhook_secret?: string | null
         }
         Relationships: []
       }
@@ -325,12 +370,58 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan: string
+          renewal_date: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan: string
+          renewal_date?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: string
+          renewal_date?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
           created_at: string
           currency: string
           external_id: string | null
+          fraud_flag: string | null
           id: string
           order_id: string
           provider: string
@@ -342,6 +433,7 @@ export type Database = {
           created_at?: string
           currency?: string
           external_id?: string | null
+          fraud_flag?: string | null
           id?: string
           order_id: string
           provider: string
@@ -353,6 +445,7 @@ export type Database = {
           created_at?: string
           currency?: string
           external_id?: string | null
+          fraud_flag?: string | null
           id?: string
           order_id?: string
           provider?: string

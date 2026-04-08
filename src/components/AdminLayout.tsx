@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, Menu, X, CreditCard, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -28,6 +28,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
     { to: '/admin/products', icon: Package, label: 'Products' },
     { to: '/admin/bulk-import', icon: Menu, label: 'Bulk Import' },
+    { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
+    { to: '/admin/stripe-settings', icon: CreditCard, label: 'Stripe Settings' },
     { to: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 

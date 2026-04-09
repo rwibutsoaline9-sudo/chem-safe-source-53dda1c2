@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,7 +21,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get payment settings from DB
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -36,10 +40,8 @@ Deno.serve(async (req) => {
 
     const stripeKey = settings.stripe_secret_key;
 
-    // Get client IP for fraud tracking
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
-    // Simple fraud check: count recent orders from this IP
     const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
     const { count: recentOrders } = await supabase
       .from("orders")
@@ -49,7 +51,6 @@ Deno.serve(async (req) => {
 
     const fraudFlag = (recentOrders ?? 0) > 10 ? "suspicious" : "safe";
 
-    // Create Stripe PaymentIntent
     const stripeRes = await fetch("https://api.stripe.com/v1/payment_intents", {
       method: "POST",
       headers: {
@@ -74,7 +75,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create order in DB
     const { data: order } = await supabase.from("orders").insert({
       total_amount: amount,
       currency,
@@ -87,7 +87,6 @@ Deno.serve(async (req) => {
       metadata: { items, ...metadata },
     }).select().single();
 
-    // Create transaction record
     if (order) {
       await supabase.from("transactions").insert({
         order_id: order.id,
@@ -100,7 +99,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Audit log
     await supabase.from("audit_logs").insert({
       action: "payment_intent_created",
       data: { payment_intent_id: paymentIntent.id, amount, fraud_flag: fraudFlag },

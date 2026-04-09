@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Clock, CreditCard, Mail, MapPin, MessageCircle, Phone, Upload } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import StripeCheckout from "@/components/StripeCheckout";
 import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     businessName: "",
     contactName: "",
@@ -55,45 +56,14 @@ const Contact = () => {
       toast.error("Please enter a valid payment amount");
       return;
     }
-    setShowPayment(true);
-  };
-
-  const handlePaymentSuccess = (paymentIntentId: string) => {
-    console.log("Payment succeeded:", paymentIntentId);
-    setShowPayment(false);
-    setSubmitted(false);
-    setFormData({
-      businessName: "", contactName: "", email: "", phone: "",
-      product: "", quantity: "", message: "",
+    const params = new URLSearchParams({
+      amount: quoteAmount.toString(),
+      email: formData.email,
+      product: formData.product,
+      quantity: formData.quantity,
     });
-    setQuoteAmount(0);
+    navigate(`/checkout?${params.toString()}`);
   };
-
-  if (showPayment) {
-    return (
-      <div className="min-h-screen bg-background">
-        <section className="bg-muted/50 py-8 sm:py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">Complete Payment</h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Secure payment powered by Stripe
-            </p>
-          </div>
-        </section>
-        <section className="py-8 sm:py-12 md:py-16">
-          <div className="container mx-auto px-4 max-w-lg">
-            <StripeCheckout
-              amount={quoteAmount}
-              customerEmail={formData.email}
-              items={{ product: formData.product, quantity: formData.quantity }}
-              onSuccess={handlePaymentSuccess}
-              onCancel={() => setShowPayment(false)}
-            />
-          </div>
-        </section>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

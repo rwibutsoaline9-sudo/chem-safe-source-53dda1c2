@@ -18,6 +18,7 @@ import Products from "./pages/Products";
 import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Checkout from "./pages/Checkout";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";
@@ -57,6 +58,9 @@ const App = () => {
             <Route path="/terms" element={<PublicLayout><TermsOfService /></PublicLayout>} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/shipping" element={<PublicLayout><ShippingPolicy /></PublicLayout>} />
+
+            {/* Checkout */}
+            <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
 
             {/* Auth route (no header/footer) */}
             <Route path="/auth" element={<Auth />} />

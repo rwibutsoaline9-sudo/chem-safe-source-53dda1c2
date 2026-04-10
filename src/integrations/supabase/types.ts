@@ -485,7 +485,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      payment_settings_public: {
+        Row: {
+          crypto_enabled: boolean | null
+          id: string | null
+          one_time_enabled: boolean | null
+          paypal_enabled: boolean | null
+          stripe_enabled: boolean | null
+          stripe_mode: string | null
+          stripe_public_key: string | null
+          subscriptions_enabled: boolean | null
+        }
+        Insert: {
+          crypto_enabled?: boolean | null
+          id?: string | null
+          one_time_enabled?: boolean | null
+          paypal_enabled?: boolean | null
+          stripe_enabled?: boolean | null
+          stripe_mode?: string | null
+          stripe_public_key?: string | null
+          subscriptions_enabled?: boolean | null
+        }
+        Update: {
+          crypto_enabled?: boolean | null
+          id?: string | null
+          one_time_enabled?: boolean | null
+          paypal_enabled?: boolean | null
+          stripe_enabled?: boolean | null
+          stripe_mode?: string | null
+          stripe_public_key?: string | null
+          subscriptions_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

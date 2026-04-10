@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, ShieldAlert } from 'lucide-react';
+import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+
+const SUPABASE_URL = "https://lriwodanoclewwjrsimi.supabase.co";
 
 interface Product {
   id: string;
@@ -32,8 +34,10 @@ const Products = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -45,7 +49,6 @@ const Products = () => {
     price_unit: 'kg',
     price_currency: 'USD',
     is_restricted: false,
-    image_url: '',
   });
 
   useEffect(() => {
@@ -67,12 +70,46 @@ const Products = () => {
     setLoading(false);
   };
 
+  const handleUploadImages = async (files: FileList) => {
+    setUploading(true);
+    const uploaded: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+      const filePath = `products/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (error) {
+        toast.error(`Failed to upload ${file.name}`);
+      } else {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
+        uploaded.push(url);
+      }
+    }
+
+    setImageUrls((prev) => [...prev, ...uploaded]);
+    if (uploaded.length > 0) toast.success(`${uploaded.length} image(s) uploaded`);
+    setUploading(false);
+  };
+
+  const removeImage = (index: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Use the first uploaded image as image_url, store all in description or as first
+    const image_url = imageUrls.length > 0 ? imageUrls[0] : null;
 
     const productData = {
       ...formData,
       price_value: parseFloat(formData.price_value),
+      image_url,
     };
 
     if (editingProduct) {
@@ -127,14 +164,15 @@ const Products = () => {
       price_unit: product.price_unit,
       price_currency: product.price_currency,
       is_restricted: product.is_restricted,
-      image_url: product.image_url || '',
     });
+    setImageUrls(product.image_url ? [product.image_url] : []);
     setDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingProduct(null);
+    setImageUrls([]);
     setFormData({
       name: '',
       category: '',
@@ -146,7 +184,6 @@ const Products = () => {
       price_unit: 'kg',
       price_currency: 'USD',
       is_restricted: false,
-      image_url: '',
     });
   };
 
@@ -162,7 +199,7 @@ const Products = () => {
           <h1 className="text-3xl font-bold">Products Management</h1>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingProduct(null)}>
+              <Button onClick={() => { setEditingProduct(null); setImageUrls([]); }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Product
               </Button>
@@ -237,15 +274,64 @@ const Products = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="image_url">Image URL</Label>
-                    <Input
-                      id="image_url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    />
-                  </div>
                 </div>
+
+                {/* Image Upload Section */}
+                <div className="space-y-2">
+                  <Label>Product Images</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => e.target.files && handleUploadImages(e.target.files)}
+                  />
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                  >
+                    {uploading ? (
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Uploading...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <Upload className="h-8 w-8" />
+                        <span className="text-sm">Click to upload images (multiple allowed)</span>
+                        <span className="text-xs">JPG, PNG, WebP up to 5MB each</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {imageUrls.length > 0 && (
+                    <div className="grid grid-cols-3 gap-3 mt-3">
+                      {imageUrls.map((url, index) => (
+                        <div key={index} className="relative group rounded-lg overflow-hidden border">
+                          <img
+                            src={url}
+                            alt={`Product ${index + 1}`}
+                            className="w-full h-24 object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          {index === 0 && (
+                            <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">
+                              Main
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
                   <Textarea
@@ -269,7 +355,7 @@ const Products = () => {
                   <Button type="button" variant="outline" onClick={handleCloseDialog}>
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" disabled={uploading}>
                     {editingProduct ? 'Update' : 'Create'} Product
                   </Button>
                 </div>
@@ -294,6 +380,7 @@ const Products = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Purity</TableHead>
@@ -305,6 +392,15 @@ const Products = () => {
               <TableBody>
                 {filteredProducts.map((product) => (
                   <TableRow key={product.id}>
+                    <TableCell>
+                      {product.image_url && product.image_url.startsWith('http') ? (
+                        <img src={product.image_url} alt="" className="w-10 h-10 rounded object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>{product.purity || '-'}</TableCell>

@@ -1,22 +1,9 @@
-import productCausticSoda from "@/assets/product-caustic-soda.jpg";
-import productSodiumCyanide from "@/assets/product-sodium-cyanide.jpg";
 import productUrea from "@/assets/product-urea.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import categoryAcids from "@/assets/category-acids.jpg";
-import categoryAlkalis from "@/assets/category-alkalis.jpg";
-import categoryGases from "@/assets/category-gases.jpg";
-import categoryMetalSalts from "@/assets/category-metal-salts.jpg";
-import categoryOrganics from "@/assets/category-organics.jpg";
-import categoryOxides from "@/assets/category-oxides.jpg";
-import categoryPolymers from "@/assets/category-polymers.jpg";
-import categorySalts from "@/assets/category-salts.jpg";
-import categorySolvents from "@/assets/category-solvents.jpg";
-import categorySurfactants from "@/assets/category-surfactants.jpg";
 
 interface Product {
   id: string;
@@ -37,24 +24,11 @@ interface ProductCardProps {
   product: Product;
 }
 
-const imageMap: Record<string, string> = {
-  "product-urea.jpg": productUrea,
-  "product-sodium-cyanide.jpg": productSodiumCyanide,
-  "product-caustic-soda.jpg": productCausticSoda,
-  "category-acids.jpg": categoryAcids,
-  "category-alkalis.jpg": categoryAlkalis,
-  "category-solvents.jpg": categorySolvents,
-  "category-salts.jpg": categorySalts,
-  "category-organics.jpg": categoryOrganics,
-  "category-gases.jpg": categoryGases,
-  "category-polymers.jpg": categoryPolymers,
-  "category-oxides.jpg": categoryOxides,
-  "category-surfactants.jpg": categorySurfactants,
-  "category-metal-salts.jpg": categoryMetalSalts,
-};
-
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const imageSrc = product.image_url ? imageMap[product.image_url] || productUrea : productUrea;
+  // If image_url is a full URL (from storage bucket), use it directly; otherwise fallback
+  const imageSrc = product.image_url && product.image_url.startsWith('http')
+    ? product.image_url
+    : productUrea;
 
   return (
     <Card className="w-full h-[320px] sm:h-[350px] flex flex-col transition-all duration-300 hover:shadow-lg border-border">

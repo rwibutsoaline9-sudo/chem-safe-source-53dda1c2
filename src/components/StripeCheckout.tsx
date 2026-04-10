@@ -69,7 +69,7 @@ const StripeCheckout = ({ amount, customerEmail, items, onSuccess, onCancel }: S
       try {
         // Get publishable key from payment_settings
         const { data: settings } = await supabase
-          .from('payment_settings')
+          .from('payment_settings_public' as any)
           .select('stripe_public_key, stripe_enabled')
           .limit(1)
           .single();

@@ -126,7 +126,7 @@ const Checkout = () => {
           .from('payment_settings_public' as any)
           .select('stripe_public_key, stripe_enabled')
           .limit(1)
-          .single();
+          .single() as { data: { stripe_public_key: string | null; stripe_enabled: boolean } | null };
 
         if (!settings?.stripe_enabled || !settings?.stripe_public_key) {
           setError('Stripe payments are not configured. Please contact support.');

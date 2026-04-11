@@ -26,6 +26,7 @@ import AdminProducts from "./pages/admin/Products";
 import Settings from "./pages/admin/Settings";
 import StripeSettings from "./pages/admin/StripeSettings";
 import Payments from "./pages/admin/Payments";
+import AdminMessages from "./pages/admin/Messages";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin/stripe-settings" element={<ProtectedRoute><StripeSettings /></ProtectedRoute>} />
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+            <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

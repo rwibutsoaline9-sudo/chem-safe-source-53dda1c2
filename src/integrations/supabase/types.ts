@@ -485,41 +485,17 @@ export type Database = {
       }
     }
     Views: {
-      payment_settings_public: {
-        Row: {
-          crypto_enabled: boolean | null
-          id: string | null
-          one_time_enabled: boolean | null
-          paypal_enabled: boolean | null
-          stripe_enabled: boolean | null
-          stripe_mode: string | null
-          stripe_public_key: string | null
-          subscriptions_enabled: boolean | null
-        }
-        Insert: {
-          crypto_enabled?: boolean | null
-          id?: string | null
-          one_time_enabled?: boolean | null
-          paypal_enabled?: boolean | null
-          stripe_enabled?: boolean | null
-          stripe_mode?: string | null
-          stripe_public_key?: string | null
-          subscriptions_enabled?: boolean | null
-        }
-        Update: {
-          crypto_enabled?: boolean | null
-          id?: string | null
-          one_time_enabled?: boolean | null
-          paypal_enabled?: boolean | null
-          stripe_enabled?: boolean | null
-          stripe_mode?: string | null
-          stripe_public_key?: string | null
-          subscriptions_enabled?: boolean | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_public_payment_settings: {
+        Args: never
+        Returns: {
+          stripe_enabled: boolean
+          stripe_mode: string
+          stripe_public_key: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

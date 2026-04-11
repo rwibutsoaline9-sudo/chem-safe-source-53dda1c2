@@ -123,8 +123,7 @@ const Checkout = () => {
     const init = async () => {
       try {
         const { data: settings } = await supabase
-          .from('payment_settings_public' as any)
-          .select('stripe_public_key, stripe_enabled')
+          .rpc('get_public_payment_settings')
           .limit(1)
           .single() as { data: { stripe_public_key: string | null; stripe_enabled: boolean } | null };
 

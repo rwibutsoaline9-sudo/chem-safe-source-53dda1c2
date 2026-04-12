@@ -146,6 +146,41 @@ export type Database = {
         }
         Relationships: []
       }
+      message_replies: {
+        Row: {
+          admin_id: string | null
+          content: string
+          created_at: string
+          id: string
+          message_id: string
+          sender_type: string
+        }
+        Insert: {
+          admin_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          message_id: string
+          sender_type?: string
+        }
+        Update: {
+          admin_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string

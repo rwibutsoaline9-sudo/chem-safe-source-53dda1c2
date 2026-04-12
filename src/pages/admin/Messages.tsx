@@ -23,6 +23,7 @@ import {
   StarOff,
   MoreVertical,
   ArrowLeft,
+  Send,
 } from 'lucide-react';
 import {
   DropdownMenu,

@@ -216,7 +216,7 @@ const Checkout = () => {
               <span className="font-semibold">{email}</span>.
             </p>
             {plan === '100' && (
-              <div className="flex items-center justify-center gap-2 text-sm text-green-600 font-medium">
+              <div className="flex items-center justify-center gap-2 text-sm text-primary font-medium">
                 <FileCheck className="w-4 h-4" />
                 Certificate of Analysis will be included with your shipment
               </div>

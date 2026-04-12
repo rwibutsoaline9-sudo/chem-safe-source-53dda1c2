@@ -22,6 +22,7 @@ import {
   Lock,
   ArrowLeft,
   Package,
+  FileCheck,
 } from 'lucide-react';
 
 /* ── Inner form rendered inside <Elements> ── */
@@ -81,17 +82,39 @@ const CheckoutForm = ({
   );
 };
 
+const planLabels: Record<string, { label: string; description: string; includes: string[] }> = {
+  '20': {
+    label: 'Sample Deposit (20%)',
+    description: 'Product sample for evaluation before full commitment.',
+    includes: ['Product sample shipment', 'Quality evaluation period'],
+  },
+  '50': {
+    label: 'Sample + Half Order (50%)',
+    description: 'Sample plus 50% of your ordered quantity.',
+    includes: ['Product sample shipment', '50% of ordered quantity', 'Quality evaluation period'],
+  },
+  '100': {
+    label: 'Full Order + Certificate (100%)',
+    description: 'Complete order with sample, full quantity, and Certificate of Analysis.',
+    includes: ['Product sample shipment', 'Full ordered quantity', 'Certificate of Analysis (COA)', 'Priority processing'],
+  },
+};
+
 /* ── Main Checkout Page ── */
 const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Read order info from query params
   const amount = parseFloat(searchParams.get('amount') || '0');
   const email = searchParams.get('email') || '';
   const product = searchParams.get('product') || '';
   const quantity = searchParams.get('quantity') || '';
+  const unitPrice = searchParams.get('unitPrice') || '';
+  const totalPrice = searchParams.get('totalPrice') || '';
+  const plan = searchParams.get('plan') || '100';
   const status = searchParams.get('status') || '';
+
+  const planInfo = planLabels[plan] || planLabels['100'];
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [stripePromise, setStripePromise] =
@@ -104,11 +127,9 @@ const Checkout = () => {
 
   const items = useMemo(() => ({ product, quantity }), [product, quantity]);
 
-  /* Init Stripe + create PaymentIntent */
   useEffect(() => {
     if (paymentStatus !== 'idle') {
       setLoading(false);
-      // If redirected back with verifying status, check the payment
       if (paymentStatus === 'verifying') {
         setTimeout(() => setPaymentStatus('success'), 2500);
       }
@@ -159,13 +180,11 @@ const Checkout = () => {
 
   const handleSuccess = (paymentIntentId: string) => {
     setPaymentStatus('verifying');
-    // Simulate backend verification delay
     setTimeout(() => {
       setPaymentStatus('success');
     }, 2500);
   };
 
-  /* ── Verifying state ── */
   if (paymentStatus === 'verifying') {
     return (
       <PageShell>
@@ -174,8 +193,7 @@ const Checkout = () => {
             <Loader2 className="w-14 h-14 animate-spin mx-auto text-primary" />
             <h2 className="text-2xl font-bold">Verifying Payment…</h2>
             <p className="text-muted-foreground">
-              Please wait while we confirm your payment with Stripe. Do not
-              close this page.
+              Please wait while we confirm your payment with Stripe. Do not close this page.
             </p>
           </CardContent>
         </Card>
@@ -183,7 +201,6 @@ const Checkout = () => {
     );
   }
 
-  /* ── Success state ── */
   if (paymentStatus === 'success') {
     return (
       <PageShell>
@@ -194,10 +211,16 @@ const Checkout = () => {
             </div>
             <h2 className="text-2xl font-bold">Payment Confirmed!</h2>
             <p className="text-muted-foreground">
-              Your payment of <span className="font-semibold">${amount.toFixed(2)}</span> has
+              Your payment of <span className="font-semibold">${amount.toFixed(2)}</span> ({planInfo.label}) has
               been processed. A receipt has been sent to{' '}
               <span className="font-semibold">{email}</span>.
             </p>
+            {plan === '100' && (
+              <div className="flex items-center justify-center gap-2 text-sm text-green-600 font-medium">
+                <FileCheck className="w-4 h-4" />
+                Certificate of Analysis will be included with your shipment
+              </div>
+            )}
             <Separator />
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button onClick={() => navigate('/products')}>
@@ -213,16 +236,13 @@ const Checkout = () => {
     );
   }
 
-  /* ── Error state ── */
   if (error) {
     return (
       <PageShell>
         <Card className="max-w-lg mx-auto border-destructive/30 bg-destructive/5">
           <CardContent className="p-10 text-center space-y-5">
             <XCircle className="w-14 h-14 text-destructive mx-auto" />
-            <h2 className="text-xl font-bold text-destructive">
-              Payment Error
-            </h2>
+            <h2 className="text-xl font-bold text-destructive">Payment Error</h2>
             <p className="text-muted-foreground">{error}</p>
             <Button variant="outline" onClick={() => navigate(-1)}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
@@ -233,16 +253,13 @@ const Checkout = () => {
     );
   }
 
-  /* ── Loading state ── */
   if (loading) {
     return (
       <PageShell>
         <Card className="max-w-lg mx-auto">
           <CardContent className="p-10 text-center space-y-4">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-            <p className="text-muted-foreground">
-              Initializing secure checkout…
-            </p>
+            <p className="text-muted-foreground">Initializing secure checkout…</p>
           </CardContent>
         </Card>
       </PageShell>
@@ -251,7 +268,6 @@ const Checkout = () => {
 
   if (!clientSecret || !stripePromise) return null;
 
-  /* ── Checkout form ── */
   return (
     <PageShell>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-5xl mx-auto">
@@ -288,25 +304,63 @@ const Checkout = () => {
               <CardTitle className="text-lg">Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Plan Badge */}
+              <Badge variant="secondary" className="text-xs">
+                {planInfo.label}
+              </Badge>
+
               {product && (
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-medium">{product}</p>
-                    {quantity && (
-                      <p className="text-sm text-muted-foreground">
-                        Qty: {quantity}
-                      </p>
-                    )}
-                  </div>
+                <div>
+                  <p className="font-medium">{product}</p>
+                  {unitPrice && quantity && (
+                    <p className="text-sm text-muted-foreground">
+                      ${parseFloat(unitPrice).toLocaleString()} × {quantity} units
+                    </p>
+                  )}
                 </div>
               )}
+
               <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span>${amount.toFixed(2)}</span>
+
+              {totalPrice && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Full Order Total</span>
+                  <span>${parseFloat(totalPrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Payment Plan</span>
+                <span>{plan}%</span>
               </div>
-              {email && (
+
+              <Separator />
+
+              <div className="flex justify-between text-lg font-bold">
+                <span>Amount Due</span>
+                <span className="text-primary">${amount.toFixed(2)}</span>
+              </div>
+
+              {parseFloat(plan) < 100 && totalPrice && (
                 <p className="text-xs text-muted-foreground">
+                  Remaining balance: ${(parseFloat(totalPrice) - amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </p>
+              )}
+
+              {/* What's included */}
+              <div className="pt-2">
+                <p className="text-xs font-semibold mb-2">Includes:</p>
+                <ul className="space-y-1">
+                  {planInfo.includes.map((item, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <span className="text-primary">✓</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {email && (
+                <p className="text-xs text-muted-foreground pt-2">
                   Receipt will be sent to {email}
                 </p>
               )}
@@ -324,21 +378,13 @@ const Checkout = () => {
                 Stripe. We never store your card details.
               </p>
               <div className="flex gap-2">
-                <Badge variant="outline" className="text-xs">
-                  256-bit SSL
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  PCI Compliant
-                </Badge>
+                <Badge variant="outline" className="text-xs">256-bit SSL</Badge>
+                <Badge variant="outline" className="text-xs">PCI Compliant</Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => navigate(-1)}
-          >
+          <Button variant="ghost" className="w-full" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Cancel & Go Back
           </Button>
         </div>
@@ -347,7 +393,6 @@ const Checkout = () => {
   );
 };
 
-/* ── Page wrapper ── */
 const PageShell = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-background">
     <section className="bg-muted/50 py-6 sm:py-10">
@@ -355,9 +400,7 @@ const PageShell = ({ children }: { children: React.ReactNode }) => (
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
           <Lock className="w-6 h-6" /> Secure Checkout
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Complete your purchase securely
-        </p>
+        <p className="text-muted-foreground mt-1">Complete your purchase securely</p>
       </div>
     </section>
     <section className="py-8 sm:py-12">

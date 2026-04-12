@@ -106,12 +106,17 @@ const getAvatarColor = (name: string) => {
 };
 
 const Messages = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read' | 'archived'>('all');
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchMessages();

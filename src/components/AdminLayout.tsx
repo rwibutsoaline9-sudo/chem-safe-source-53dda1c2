@@ -14,6 +14,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const unreadCount = useUnreadMessages();
 
   const handleLogout = async () => {
     const { error } = await signOut();

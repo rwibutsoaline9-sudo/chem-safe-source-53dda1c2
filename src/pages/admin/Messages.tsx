@@ -48,6 +48,15 @@ interface ContactMessage {
   updated_at: string | null;
 }
 
+interface Reply {
+  id: string;
+  message_id: string;
+  sender_type: string;
+  content: string;
+  admin_id: string | null;
+  created_at: string;
+}
+
 const statusColors: Record<string, string> = {
   unread: 'bg-primary text-primary-foreground',
   read: 'bg-muted text-muted-foreground',

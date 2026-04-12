@@ -502,6 +502,29 @@ const Messages = () => {
                     </div>
                   </div>
 
+                  {/* Admin Replies Thread */}
+                  {replies.map((reply) => (
+                    <div key={reply.id} className={cn('flex', reply.sender_type === 'admin' ? 'justify-end' : 'justify-start')}>
+                      <div className={cn('max-w-[80%] relative')}>
+                        <div className={cn(
+                          'rounded-2xl p-3 shadow-sm',
+                          reply.sender_type === 'admin'
+                            ? 'bg-primary text-primary-foreground rounded-br-sm'
+                            : 'bg-card border border-border/50 rounded-bl-sm'
+                        )}>
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{reply.content}</p>
+                          <div className={cn('flex justify-end mt-1')}>
+                            <span className={cn('text-[10px] flex items-center gap-1', reply.sender_type === 'admin' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                              <Clock className="h-3 w-3" />
+                              {new Date(reply.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              {reply.sender_type === 'admin' && <CheckCheck className="h-3 w-3 ml-0.5" />}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
                   {/* Quick actions */}
                   <div className="flex justify-center gap-2 pt-4">
                     <a href={`mailto:${selected.email}`}>
@@ -524,8 +547,37 @@ const Messages = () => {
                       </Button>
                     </a>
                   </div>
+
+                  <div ref={chatEndRef} />
                 </div>
               </ScrollArea>
+
+              {/* Reply Input Bar */}
+              <div className="border-t bg-card p-3">
+                <div className="flex gap-2 items-end max-w-2xl mx-auto">
+                  <Textarea
+                    placeholder="Type a reply..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendReply();
+                      }
+                    }}
+                    className="min-h-[42px] max-h-32 resize-none bg-muted/50 border-0 focus-visible:ring-1"
+                    rows={1}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={sendReply}
+                    disabled={!replyText.trim() || sending}
+                    className="h-[42px] w-[42px] flex-shrink-0 rounded-full"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </>
           ) : (
             /* Empty state */

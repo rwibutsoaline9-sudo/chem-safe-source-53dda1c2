@@ -168,7 +168,49 @@ const Messages = () => {
     if (msg.status === 'unread') {
       updateStatus(msg.id, 'read');
     }
+    fetchReplies(msg.id);
   };
+
+  const fetchReplies = async (messageId: string) => {
+    const { data, error } = await supabase
+      .from('message_replies')
+      .select('*')
+      .eq('message_id', messageId)
+      .order('created_at', { ascending: true });
+
+    if (!error) setReplies(data || []);
+  };
+
+  const sendReply = async () => {
+    if (!replyText.trim() || !selectedId || !user) return;
+    setSending(true);
+    const { error } = await supabase.from('message_replies').insert({
+      message_id: selectedId,
+      content: replyText.trim(),
+      sender_type: 'admin',
+      admin_id: user.id,
+    });
+
+    if (error) {
+      toast.error('Failed to send reply');
+    } else {
+      setReplyText('');
+      updateStatus(selectedId, 'replied');
+      fetchReplies(selectedId);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+    setSending(false);
+  };
+
+  // Real-time replies
+  useEffect(() => {
+    if (!selectedId) return;
+    const channel = supabase
+      .channel('replies-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_replies', filter: `message_id=eq.${selectedId}` }, () => fetchReplies(selectedId))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedId]);
 
   const selected = messages.find((m) => m.id === selectedId);
 

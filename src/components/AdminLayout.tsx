@@ -70,8 +70,24 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 }`
               }
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              {sidebarOpen && <span>{item.label}</span>}
+              <div className="relative flex-shrink-0">
+                <item.icon className="h-5 w-5" />
+                {item.label === 'Messages' && unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              {sidebarOpen && (
+                <span className="flex items-center gap-2">
+                  {item.label}
+                  {item.label === 'Messages' && unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                      {unreadCount}
+                    </span>
+                  )}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search,
@@ -21,6 +23,7 @@ import {
   StarOff,
   MoreVertical,
   ArrowLeft,
+  Send,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -43,6 +46,15 @@ interface ContactMessage {
   status: string | null;
   created_at: string | null;
   updated_at: string | null;
+}
+
+interface Reply {
+  id: string;
+  message_id: string;
+  sender_type: string;
+  content: string;
+  admin_id: string | null;
+  created_at: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -94,12 +106,17 @@ const getAvatarColor = (name: string) => {
 };
 
 const Messages = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read' | 'archived'>('all');
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchMessages();
@@ -151,7 +168,49 @@ const Messages = () => {
     if (msg.status === 'unread') {
       updateStatus(msg.id, 'read');
     }
+    fetchReplies(msg.id);
   };
+
+  const fetchReplies = async (messageId: string) => {
+    const { data, error } = await supabase
+      .from('message_replies')
+      .select('*')
+      .eq('message_id', messageId)
+      .order('created_at', { ascending: true });
+
+    if (!error) setReplies(data || []);
+  };
+
+  const sendReply = async () => {
+    if (!replyText.trim() || !selectedId || !user) return;
+    setSending(true);
+    const { error } = await supabase.from('message_replies').insert({
+      message_id: selectedId,
+      content: replyText.trim(),
+      sender_type: 'admin',
+      admin_id: user.id,
+    });
+
+    if (error) {
+      toast.error('Failed to send reply');
+    } else {
+      setReplyText('');
+      updateStatus(selectedId, 'replied');
+      fetchReplies(selectedId);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+    setSending(false);
+  };
+
+  // Real-time replies
+  useEffect(() => {
+    if (!selectedId) return;
+    const channel = supabase
+      .channel('replies-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_replies', filter: `message_id=eq.${selectedId}` }, () => fetchReplies(selectedId))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedId]);
 
   const selected = messages.find((m) => m.id === selectedId);
 
@@ -443,6 +502,29 @@ const Messages = () => {
                     </div>
                   </div>
 
+                  {/* Admin Replies Thread */}
+                  {replies.map((reply) => (
+                    <div key={reply.id} className={cn('flex', reply.sender_type === 'admin' ? 'justify-end' : 'justify-start')}>
+                      <div className={cn('max-w-[80%] relative')}>
+                        <div className={cn(
+                          'rounded-2xl p-3 shadow-sm',
+                          reply.sender_type === 'admin'
+                            ? 'bg-primary text-primary-foreground rounded-br-sm'
+                            : 'bg-card border border-border/50 rounded-bl-sm'
+                        )}>
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{reply.content}</p>
+                          <div className={cn('flex justify-end mt-1')}>
+                            <span className={cn('text-[10px] flex items-center gap-1', reply.sender_type === 'admin' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                              <Clock className="h-3 w-3" />
+                              {new Date(reply.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              {reply.sender_type === 'admin' && <CheckCheck className="h-3 w-3 ml-0.5" />}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
                   {/* Quick actions */}
                   <div className="flex justify-center gap-2 pt-4">
                     <a href={`mailto:${selected.email}`}>
@@ -465,8 +547,37 @@ const Messages = () => {
                       </Button>
                     </a>
                   </div>
+
+                  <div ref={chatEndRef} />
                 </div>
               </ScrollArea>
+
+              {/* Reply Input Bar */}
+              <div className="border-t bg-card p-3">
+                <div className="flex gap-2 items-end max-w-2xl mx-auto">
+                  <Textarea
+                    placeholder="Type a reply..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendReply();
+                      }
+                    }}
+                    className="min-h-[42px] max-h-32 resize-none bg-muted/50 border-0 focus-visible:ring-1"
+                    rows={1}
+                  />
+                  <Button
+                    size="icon"
+                    onClick={sendReply}
+                    disabled={!replyText.trim() || sending}
+                    className="h-[42px] w-[42px] flex-shrink-0 rounded-full"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </>
           ) : (
             /* Empty state */

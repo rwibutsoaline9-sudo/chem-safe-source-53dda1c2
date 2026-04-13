@@ -50,7 +50,7 @@ const App = () => {
             {/* Public routes with header/footer */}
             <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
-            <Route path="/products/:id" element={<PublicLayout><ProductDetail /></PublicLayout>} />
+            <Route path="/products/:slug" element={<PublicLayout><ProductDetail /></PublicLayout>} />
             <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
             <Route path="/safety" element={<PublicLayout><Safety /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />

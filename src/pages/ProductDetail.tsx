@@ -6,36 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Download, Package, Beaker, FileText, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import productUrea from "@/assets/product-urea.jpg";
-import productSodiumCyanide from "@/assets/product-sodium-cyanide.jpg";
-import productCausticSoda from "@/assets/product-caustic-soda.jpg";
-
-import categoryAcids from "@/assets/category-acids.jpg";
-import categoryAlkalis from "@/assets/category-alkalis.jpg";
-import categorySolvents from "@/assets/category-solvents.jpg";
-import categorySalts from "@/assets/category-salts.jpg";
-import categoryOrganics from "@/assets/category-organics.jpg";
-import categoryGases from "@/assets/category-gases.jpg";
-import categoryPolymers from "@/assets/category-polymers.jpg";
-import categoryOxides from "@/assets/category-oxides.jpg";
-import categorySurfactants from "@/assets/category-surfactants.jpg";
-import categoryMetalSalts from "@/assets/category-metal-salts.jpg";
-
-const imageMap: Record<string, string> = {
-  "product-urea.jpg": productUrea,
-  "product-sodium-cyanide.jpg": productSodiumCyanide,
-  "product-caustic-soda.jpg": productCausticSoda,
-  "category-acids.jpg": categoryAcids,
-  "category-alkalis.jpg": categoryAlkalis,
-  "category-solvents.jpg": categorySolvents,
-  "category-salts.jpg": categorySalts,
-  "category-organics.jpg": categoryOrganics,
-  "category-gases.jpg": categoryGases,
-  "category-polymers.jpg": categoryPolymers,
-  "category-oxides.jpg": categoryOxides,
-  "category-surfactants.jpg": categorySurfactants,
-  "category-metal-salts.jpg": categoryMetalSalts,
-};
+import { getProductImage } from "@/lib/productImages";
 
 interface Product {
   id: string;
@@ -103,7 +74,7 @@ const ProductDetail = () => {
     );
   }
 
-  const imageSrc = product.image_url ? imageMap[product.image_url] || productUrea : productUrea;
+  const imageSrc = getProductImage(product.image_url, product.category);
 
   const handleDownloadSDS = () => {
     toast.info("SDS download will be available upon quote request verification");

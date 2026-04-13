@@ -74,7 +74,7 @@ const ProductDetail = () => {
     );
   }
 
-  const imageSrc = product.image_url ? imageMap[product.image_url] || productUrea : productUrea;
+  const imageSrc = getProductImage(product.image_url, product.category);
 
   const handleDownloadSDS = () => {
     toast.info("SDS download will be available upon quote request verification");

@@ -58,17 +58,7 @@ const ProductDetail = () => {
     };
 
     fetchProduct();
-        console.error('Error fetching product:', error);
-      } else {
-        setProduct(data);
-      }
-      setLoading(false);
-    };
-
-    if (id) {
-      fetchProduct();
-    }
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (

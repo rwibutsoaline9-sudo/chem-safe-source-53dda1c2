@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getProductImage } from "@/lib/productImages";
+import { toSlug } from "@/lib/slug";
 
 interface Product {
   id: string;
@@ -25,9 +26,10 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const imageSrc = getProductImage(product.image_url, product.category);
+  const productSlug = toSlug(product.name);
 
   return (
-    <Link to={`/products/${product.id}`} className="block">
+    <Link to={`/products/${productSlug}`} className="block">
       <Card className="w-full h-[320px] sm:h-[350px] flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border cursor-pointer">
         <CardHeader className="p-0">
           <div className="w-full h-[100px] sm:h-[120px] overflow-hidden rounded-t-lg bg-muted">

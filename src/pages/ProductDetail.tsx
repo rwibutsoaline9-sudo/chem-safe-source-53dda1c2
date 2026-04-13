@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { toSlug } from "@/lib/slug";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,19 +27,37 @@ interface Product {
 }
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+      if (!slug) return;
 
-      if (error) {
+      // Try UUID lookup first (backward compat), else fetch all and match by slug
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+
+      if (isUuid) {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', slug)
+          .maybeSingle();
+        if (!error) setProduct(data);
+      } else {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+        if (!error && data) {
+          const match = data.find(p => toSlug(p.name) === slug);
+          setProduct(match || null);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
         console.error('Error fetching product:', error);
       } else {
         setProduct(data);

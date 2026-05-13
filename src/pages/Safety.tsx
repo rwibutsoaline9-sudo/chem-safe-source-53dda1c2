@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
 import { AlertTriangle, FileCheck, Lock, Shield } from "lucide-react";
 
 const Safety = () => {

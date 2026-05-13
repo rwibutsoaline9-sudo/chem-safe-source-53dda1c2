@@ -1,4 +1,5 @@
 import { Hero } from "@/components/Hero";
+import { SEO } from "@/components/SEO";
 import { ProductCard } from "@/components/ProductCard";
 import { TrustBadges } from "@/components/TrustBadges";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,11 @@ const Home = () => {
   
   return (
     <div className="min-h-screen">
+      <SEO
+        title="ChemSupply Pro — Industrial Chemicals Supplier USA"
+        description="USA B2B supplier of certified industrial chemicals: Urea, Sodium Cyanide, Caustic Soda, Phosphoric Acid. Full SDS & compliance docs."
+        path="/"
+      />
       <Hero />
       <TrustBadges />
       

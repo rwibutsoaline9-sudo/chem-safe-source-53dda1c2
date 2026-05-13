@@ -1,8 +1,14 @@
 import { Shield } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Privacy Policy — ChemSupply Pro"
+        description="How ChemSupply Pro collects, uses, and protects your personal and business information."
+        path="/privacy"
+      />
       <section className="bg-muted/50 py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">

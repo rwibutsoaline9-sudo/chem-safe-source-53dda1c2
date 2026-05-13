@@ -1,6 +1,7 @@
 import qualityControlImage from "@/assets/quality-control.jpg";
 import warehouseImage from "@/assets/warehouse.jpg";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
 import { CheckCircle } from "lucide-react";
 
 const About = () => {
@@ -14,6 +15,11 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="About ChemSupply Pro — USA Industrial Chemicals Supplier"
+        description="ChemSupply Pro: trusted B2B chemicals supplier in St Paul, MN since 2003. ISO-certified, FDA-registered, global shipping."
+        path="/about"
+      />
       <section className="bg-muted/50 py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">About ChemSupply Pro</h1>

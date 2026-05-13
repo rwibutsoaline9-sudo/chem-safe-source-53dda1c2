@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Download, Package, Beaker, FileText, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { getProductImage } from "@/lib/productImages";
+import { SEO } from "@/components/SEO";
 
 interface Product {
   id: string;
@@ -113,8 +114,19 @@ const ProductDetail = () => {
     toast.info("SDS download will be available upon quote request verification");
   };
 
+  const seoTitle = `${product.name} — ChemSupply Pro`.slice(0, 60);
+  const seoDesc = (product.description?.trim() ||
+    `Buy ${product.name} (${product.category}) from ChemSupply Pro. Bulk pricing, certified purity, full SDS & compliance.`).slice(0, 160);
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={seoTitle}
+        description={seoDesc}
+        path={`/products/${slug}`}
+        image={product.image_url ?? undefined}
+        type="product"
+      />
       <section className="py-8 border-b border-border">
         <div className="container mx-auto px-4">
           <Link to="/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">

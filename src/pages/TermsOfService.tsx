@@ -1,8 +1,14 @@
 import { FileText } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Terms of Service — ChemSupply Pro"
+        description="Terms governing the use of ChemSupply Pro services, ordering, and chemical supply agreements."
+        path="/terms"
+      />
       <section className="bg-muted/50 py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">

@@ -42,6 +42,11 @@ const Home = () => {
   
   return (
     <div className="min-h-screen">
+      <SEO
+        title="ChemSupply Pro — Industrial Chemicals Supplier USA"
+        description="USA B2B supplier of certified industrial chemicals: Urea, Sodium Cyanide, Caustic Soda, Phosphoric Acid. Full SDS & compliance docs."
+        path="/"
+      />
       <Hero />
       <TrustBadges />
       

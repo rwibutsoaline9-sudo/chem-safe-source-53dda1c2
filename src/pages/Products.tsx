@@ -67,6 +67,11 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] relative">
+      <SEO
+        title="Industrial Chemicals Catalog — ChemSupply Pro"
+        description="Browse 200+ certified industrial chemicals: acids, solvents, polymers, salts. Bulk pricing, SDS, and KYC-verified shipping."
+        path="/products"
+      />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(147,197,253,0.08),transparent_50%)]" />

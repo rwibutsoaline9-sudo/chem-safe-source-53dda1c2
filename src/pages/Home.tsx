@@ -1,4 +1,5 @@
 import { Hero } from "@/components/Hero";
+import { SEO } from "@/components/SEO";
 import { ProductCard } from "@/components/ProductCard";
 import { TrustBadges } from "@/components/TrustBadges";
 import { Button } from "@/components/ui/button";

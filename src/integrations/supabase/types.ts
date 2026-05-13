@@ -341,6 +341,7 @@ export type Database = {
           price_unit: string
           price_value: number
           purity: string | null
+          slug: string
           updated_at: string
         }
         Insert: {
@@ -359,6 +360,7 @@ export type Database = {
           price_unit: string
           price_value: number
           purity?: string | null
+          slug: string
           updated_at?: string
         }
         Update: {
@@ -377,6 +379,7 @@ export type Database = {
           price_unit?: string
           price_value?: number
           purity?: string | null
+          slug?: string
           updated_at?: string
         }
         Relationships: []
@@ -538,6 +541,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { value: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"

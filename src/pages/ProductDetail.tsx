@@ -35,25 +35,22 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       if (!slug) return;
 
-      // Try UUID lookup first (backward compat), else fetch all and match by slug
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      const column = isUuid ? 'id' : 'slug';
 
-      if (isUuid) {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', slug)
-          .maybeSingle();
-        if (!error) setProduct(data);
-      } else {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*');
-        if (!error && data) {
-          const match = data.find(p => toSlug(p.name) === slug);
-          setProduct(match || null);
-        }
+      let { data } = await supabase
+        .from('products')
+        .select('*')
+        .eq(column as any, slug)
+        .maybeSingle();
+
+      // Backward compat: fall back to name-derived slug match
+      if (!data && !isUuid) {
+        const { data: all } = await supabase.from('products').select('*');
+        data = all?.find((p: any) => toSlug(p.name) === slug) ?? null;
       }
+
+      setProduct(data as Product | null);
       setLoading(false);
     };
 

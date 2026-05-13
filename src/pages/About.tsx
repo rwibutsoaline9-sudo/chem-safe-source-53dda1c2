@@ -1,6 +1,7 @@
 import qualityControlImage from "@/assets/quality-control.jpg";
 import warehouseImage from "@/assets/warehouse.jpg";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
 import { CheckCircle } from "lucide-react";
 
 const About = () => {

@@ -360,7 +360,7 @@ export type Database = {
           price_unit: string
           price_value: number
           purity?: string | null
-          slug: string
+          slug?: string
           updated_at?: string
         }
         Update: {

@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/ProductCard";
+import { SEO } from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import {
     Select,

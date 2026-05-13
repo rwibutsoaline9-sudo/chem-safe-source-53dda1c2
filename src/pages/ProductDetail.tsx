@@ -55,6 +55,35 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
+  // Inject Product JSON-LD for SEO
+  useEffect(() => {
+    if (!product) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: product.description ?? `${product.name} — industrial chemical supplied by ChemSupply Pro.`,
+      category: product.category,
+      sku: product.cas_number ?? product.id,
+      image: product.image_url ?? undefined,
+      brand: { "@type": "Brand", name: "ChemSupply Pro" },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: product.price_currency,
+        price: product.price_value,
+        availability: "https://schema.org/InStock",
+        url: typeof window !== "undefined" ? window.location.href : undefined,
+        seller: { "@type": "Organization", name: "ChemSupply Pro" },
+      },
+    });
+    script.id = "product-jsonld";
+    document.getElementById("product-jsonld")?.remove();
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [product]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

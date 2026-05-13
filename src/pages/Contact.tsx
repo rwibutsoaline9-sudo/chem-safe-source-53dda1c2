@@ -102,6 +102,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Contact Us — ChemSupply Pro"
+        description="Request a quote or speak with our team. Phone, email, or WhatsApp +1 612 293 1250. Based in St Paul, MN."
+        path="/contact"
+      />
       <section className="bg-muted/50 py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">Request a Quote</h1>

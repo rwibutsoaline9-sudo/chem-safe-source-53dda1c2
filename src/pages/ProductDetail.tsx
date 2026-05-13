@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Download, Package, Beaker, FileText, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { getProductImage } from "@/lib/productImages";
+import { SEO } from "@/components/SEO";
 
 interface Product {
   id: string;

@@ -16,6 +16,7 @@ interface SEOProps {
  */
 export const SEO = ({ title, description, path, image, type = "website" }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
+  const ogImage = image ?? `${SITE_URL}/og-image.jpg`;
   return (
     <Helmet>
       <title>{title}</title>
@@ -25,9 +26,10 @@ export const SEO = ({ title, description, path, image, type = "website" }: SEOPr
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content={type} />
-      {image && <meta property="og:image" content={image} />}
+      <meta property="og:image" content={ogImage} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
     </Helmet>
   );
 };

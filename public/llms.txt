@@ -1,0 +1,19 @@
+# ChemSupply Pro
+
+> B2B supplier of certified industrial chemicals (Urea, Sodium Cyanide, Caustic Soda, Phosphoric Acid, and more) based in St Paul, MN. Full SDS, KYC verification, and hazmat-compliant shipping.
+
+ChemSupply Pro sells industrial chemicals to verified businesses worldwide. Every product ships with Safety Data Sheets and Certificates of Analysis. Restricted chemicals require KYC and a valid business license.
+
+## Pages
+
+- [Home](/): Overview of ChemSupply Pro and featured industrial chemicals.
+- [Products](/products): Searchable catalog of 200+ certified industrial chemicals.
+- [About](/about): Company history, certifications (ISO 9001, FDA), and quality assurance.
+- [Safety & Compliance](/safety): SDS downloads, KYC requirements, and DEA/FDA/EU compliance rules.
+- [Contact](/contact): Phone, email, and WhatsApp contact for quotes and support.
+
+## Optional
+
+- [Shipping Policy](/shipping): Hazmat shipping, lead times, and international delivery.
+- [Terms of Service](/terms): Terms governing orders and chemical supply agreements.
+- [Privacy Policy](/privacy): How we collect, use, and protect customer information.

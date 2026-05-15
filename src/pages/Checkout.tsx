@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -395,6 +396,11 @@ const Checkout = () => {
 
 const PageShell = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-background">
+    <SEO
+      title="Secure Checkout — ChemSupply Pro"
+      description="Complete your industrial chemicals order securely with Stripe-powered checkout and full SDS compliance."
+      path="/checkout"
+    />
     <section className="bg-muted/50 py-6 sm:py-10">
       <div className="container mx-auto px-4">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">

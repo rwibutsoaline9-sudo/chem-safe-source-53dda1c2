@@ -9,6 +9,7 @@ import { AlertTriangle, Download, Package, Beaker, FileText, ArrowLeft } from "l
 import { toast } from "sonner";
 import { getProductImage } from "@/lib/productImages";
 import { SEO } from "@/components/SEO";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 interface Product {
   id: string;
@@ -133,6 +134,13 @@ const ProductDetail = () => {
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to Products
           </Link>
+          <Breadcrumbs
+            items={[
+              { name: "Home", path: "/" },
+              { name: "Products", path: "/products" },
+              { name: product.name, path: `/products/${slug}` },
+            ]}
+          />
         </div>
       </section>
 

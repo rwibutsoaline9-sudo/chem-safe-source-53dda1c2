@@ -20,6 +20,7 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import { WhatsAppButton } from "./components/WhatsAppButton";
+import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
@@ -32,6 +33,7 @@ const queryClient = new QueryClient();
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen">
+    <PromoBanner />
     <Header />
     <main className="flex-1">{children}</main>
     <Footer />

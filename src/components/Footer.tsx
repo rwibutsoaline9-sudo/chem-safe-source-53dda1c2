@@ -58,7 +58,8 @@ export const Footer = () => {
               <li><Link to="/regions/africa" className="hover:text-primary transition-colors">🌍 Afrique (FR)</Link></li>
               <li><Link to="/regions/latin-america" className="hover:text-primary transition-colors">🌎 América Latina (ES)</Link></li>
             </ul>
-          
+          </div>
+
           <div>
             <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">

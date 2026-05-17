@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { getProductImage } from "@/lib/productImages";
 import { SEO } from "@/components/SEO";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ProductFAQ } from "@/components/ProductFAQ";
 
 interface Product {
   id: string;

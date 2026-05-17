@@ -19,6 +19,7 @@ import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
+import RegionLanding from "./pages/RegionLanding";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";

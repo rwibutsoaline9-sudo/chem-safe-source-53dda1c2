@@ -31,8 +31,16 @@ const Contact = () => {
     productId: "",
     quantity: 1,
     message: "",
+    promoCode: "",
   });
   const [submitted, setSubmitted] = useState(false);
+
+  // Auto-apply promo code from banner
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const applied = sessionStorage.getItem(PROMO_STORAGE_KEY);
+    if (applied) setFormData((prev) => ({ ...prev, promoCode: applied }));
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { getProductImage } from "@/lib/productImages";
 import { SEO } from "@/components/SEO";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { ProductFAQ } from "@/components/ProductFAQ";
 
 interface Product {
   id: string;
@@ -279,6 +280,11 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          <ProductFAQ
+            product={product}
+            pageUrl={`https://chem-safe-source.lovable.app/products/${slug}`}
+          />
         </div>
       </section>
     </div>

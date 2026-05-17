@@ -19,6 +19,7 @@ import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
+import RegionLanding from "./pages/RegionLanding";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";
@@ -61,6 +62,9 @@ const App = () => {
             <Route path="/terms" element={<PublicLayout><TermsOfService /></PublicLayout>} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/shipping" element={<PublicLayout><ShippingPolicy /></PublicLayout>} />
+
+            {/* Regional landing pages (localized SEO) */}
+            <Route path="/regions/:regionSlug" element={<PublicLayout><RegionLanding /></PublicLayout>} />
 
             {/* Checkout */}
             <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />

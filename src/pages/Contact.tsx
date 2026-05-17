@@ -248,25 +248,56 @@ const QuoteForm = ({
           </div>
         </div>
 
+        {/* Promo Code */}
+        <div>
+          <Label htmlFor="promoCode">Promo Code</Label>
+          <Input
+            id="promoCode"
+            name="promoCode"
+            value={formData.promoCode}
+            onChange={onChange}
+            placeholder={`Try ${PROMO_CODE} for ${PROMO_PERCENT}% off`}
+            className="uppercase"
+          />
+          {formData.promoCode && (
+            <p className={`text-xs mt-1 ${formData.promoCode.trim().toUpperCase() === PROMO_CODE ? "text-primary font-semibold" : "text-destructive"}`}>
+              {formData.promoCode.trim().toUpperCase() === PROMO_CODE
+                ? `✓ ${PROMO_PERCENT}% discount applied`
+                : "Invalid promo code"}
+            </p>
+          )}
+        </div>
+
         {/* Price Summary */}
-        {selectedProduct && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center text-sm mb-1">
-                <span className="text-muted-foreground">Unit Price</span>
-                <span className="font-medium">${selectedProduct.price_value.toLocaleString()} / {selectedProduct.price_unit}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-muted-foreground">Quantity</span>
-                <span className="font-medium">× {formData.quantity}</span>
-              </div>
-              <div className="border-t border-primary/20 pt-2 flex justify-between items-center">
-                <span className="font-semibold">Estimated Total</span>
-                <span className="text-xl font-bold text-primary">${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {selectedProduct && (() => {
+          const subtotal = selectedProduct.price_value * formData.quantity;
+          const valid = formData.promoCode.trim().toUpperCase() === PROMO_CODE;
+          const discount = valid ? subtotal * (PROMO_PERCENT / 100) : 0;
+          return (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-muted-foreground">Unit Price</span>
+                  <span className="font-medium">${selectedProduct.price_value.toLocaleString()} / {selectedProduct.price_unit}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm mb-1">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-medium">${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+                {valid && (
+                  <div className="flex justify-between items-center text-sm mb-2 text-primary">
+                    <span>Promo {PROMO_CODE} (-{PROMO_PERCENT}%)</span>
+                    <span className="font-semibold">−${discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
+                <div className="border-t border-primary/20 pt-2 flex justify-between items-center">
+                  <span className="font-semibold">Estimated Total</span>
+                  <span className="text-xl font-bold text-primary">${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         <div>
           <Label htmlFor="message">Additional Information</Label>

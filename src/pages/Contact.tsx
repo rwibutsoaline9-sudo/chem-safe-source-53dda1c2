@@ -142,7 +142,7 @@ const Contact = () => {
                     setSubmitted(false);
                     setFormData({
                       businessName: "", contactName: "", email: "", phone: "",
-                      productId: "", quantity: 1, message: "",
+                      productId: "", quantity: 1, message: "", promoCode: "",
                     });
                   }}
                   formData={formData}

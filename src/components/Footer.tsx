@@ -48,6 +48,16 @@ export const Footer = () => {
               <li><Link to="/contact" className="hover:text-primary transition-colors">Contact / Request Quote</Link></li>
             </ul>
           </div>
+
+          <div>
+            <h3 className="font-semibold mb-4">Regions Served</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/regions/europe" className="hover:text-primary transition-colors">🇪🇺 Europa (DE)</Link></li>
+              <li><Link to="/regions/middle-east" className="hover:text-primary transition-colors">🌍 الشرق الأوسط (AR)</Link></li>
+              <li><Link to="/regions/asia" className="hover:text-primary transition-colors">🌏 亚洲 (ZH)</Link></li>
+              <li><Link to="/regions/africa" className="hover:text-primary transition-colors">🌍 Afrique (FR)</Link></li>
+              <li><Link to="/regions/latin-america" className="hover:text-primary transition-colors">🌎 América Latina (ES)</Link></li>
+            </ul>
           
           <div>
             <h3 className="font-semibold mb-4">Legal</h3>

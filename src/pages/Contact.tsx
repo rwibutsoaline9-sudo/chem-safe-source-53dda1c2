@@ -54,7 +54,10 @@ const Contact = () => {
   }, []);
 
   const selectedProduct = products.find((p) => p.id === formData.productId);
-  const totalPrice = selectedProduct ? selectedProduct.price_value * formData.quantity : 0;
+  const subtotal = selectedProduct ? selectedProduct.price_value * formData.quantity : 0;
+  const promoValid = formData.promoCode.trim().toUpperCase() === PROMO_CODE;
+  const discountAmount = promoValid ? subtotal * (PROMO_PERCENT / 100) : 0;
+  const totalPrice = subtotal - discountAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

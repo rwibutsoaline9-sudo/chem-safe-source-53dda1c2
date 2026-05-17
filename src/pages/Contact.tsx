@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
+import { PROMO_CODE, PROMO_PERCENT, PROMO_STORAGE_KEY } from "@/components/PromoBanner";
 
 interface DBProduct {
   id: string;

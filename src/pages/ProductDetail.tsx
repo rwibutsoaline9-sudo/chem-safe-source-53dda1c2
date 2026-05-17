@@ -280,6 +280,11 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          <ProductFAQ
+            product={product}
+            pageUrl={`https://chem-safe-source.lovable.app/products/${slug}`}
+          />
         </div>
       </section>
     </div>

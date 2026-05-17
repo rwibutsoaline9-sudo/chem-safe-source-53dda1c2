@@ -63,6 +63,9 @@ const App = () => {
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/shipping" element={<PublicLayout><ShippingPolicy /></PublicLayout>} />
 
+            {/* Regional landing pages (localized SEO) */}
+            <Route path="/regions/:regionSlug" element={<PublicLayout><RegionLanding /></PublicLayout>} />
+
             {/* Checkout */}
             <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
 

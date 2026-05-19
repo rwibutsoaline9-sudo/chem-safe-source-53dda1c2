@@ -6,6 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ShieldCheck, Ship, FileCheck2, Globe } from "lucide-react";
 import { REGIONS, REGION_LIST, type RegionId } from "@/data/regions";
+import { RegionChat } from "@/components/RegionChat";
 
 const SITE_URL = "https://chem-safe-source.lovable.app";
 
@@ -206,6 +207,8 @@ const RegionLanding = () => {
           </div>
         </div>
       </section>
+
+      <RegionChat region={region} />
     </div>
   );
 };

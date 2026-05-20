@@ -20,7 +20,7 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
-import { WhatsAppButton } from "./components/WhatsAppButton";
+import { SiteChat } from "./components/SiteChat";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";

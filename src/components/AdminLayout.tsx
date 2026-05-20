@@ -30,6 +30,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
     { to: '/admin/products', icon: Package, label: 'Products' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages' },
+    { to: '/admin/live-chat', icon: MessageCircle, label: 'Live Chat' },
     { to: '/admin/bulk-import', icon: Menu, label: 'Bulk Import' },
     { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
     { to: '/admin/stripe-settings', icon: CreditCard, label: 'Stripe Settings' },

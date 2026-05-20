@@ -38,7 +38,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <Header />
     <main className="flex-1">{children}</main>
     <Footer />
-    <WhatsAppButton />
+    <SiteChat />
   </div>
 );
 

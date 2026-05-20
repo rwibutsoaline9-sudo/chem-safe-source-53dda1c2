@@ -264,8 +264,28 @@ export const RegionChat = ({ region }: Props) => {
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
             {messages.length === 0 && (
-              <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
-                {ui.greeting}
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
+                  {ui.greeting}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    {ui.suggestionsLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {ui.suggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSuggestion(s)}
+                        disabled={isBusy}
+                        className="text-xs text-left px-3 py-1.5 rounded-full border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition disabled:opacity-50"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 

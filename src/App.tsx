@@ -29,6 +29,7 @@ import Settings from "./pages/admin/Settings";
 import StripeSettings from "./pages/admin/StripeSettings";
 import Payments from "./pages/admin/Payments";
 import AdminMessages from "./pages/admin/Messages";
+import AdminLiveChat from "./pages/admin/LiveChat";
 
 const queryClient = new QueryClient();
 

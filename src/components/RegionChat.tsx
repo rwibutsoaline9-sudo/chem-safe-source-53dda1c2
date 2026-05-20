@@ -30,7 +30,17 @@ const LANG_NAME: Record<string, string> = {
 
 const UI: Record<
   string,
-  { open: string; title: string; greeting: string; placeholder: string; quote: string; thinking: string; clear: string }
+  {
+    open: string;
+    title: string;
+    greeting: string;
+    placeholder: string;
+    quote: string;
+    thinking: string;
+    clear: string;
+    suggestionsLabel: string;
+    suggestions: string[];
+  }
 > = {
   de: {
     open: "AI-Assistent öffnen",
@@ -40,6 +50,12 @@ const UI: Record<
     quote: "Angebot anfordern",
     thinking: "Denke nach...",
     clear: "Chat löschen",
+    suggestionsLabel: "Häufige Fragen",
+    suggestions: [
+      "Wie erhalte ich das Sicherheitsdatenblatt (SDS)?",
+      "Sind Ihre Produkte REACH/CLP-konform?",
+      "Wie lange dauert der Versand nach Europa?",
+    ],
   },
   ar: {
     open: "فتح المساعد الذكي",
@@ -49,6 +65,12 @@ const UI: Record<
     quote: "اطلب عرض سعر",
     thinking: "أفكر...",
     clear: "مسح المحادثة",
+    suggestionsLabel: "أسئلة شائعة",
+    suggestions: [
+      "كيف يمكنني تنزيل صحيفة بيانات السلامة (SDS)؟",
+      "هل المنتجات متوافقة مع GSO 2423 / GHS؟",
+      "ما هي مدة الشحن إلى دول الخليج؟",
+    ],
   },
   "zh-CN": {
     open: "打开 AI 助手",
@@ -58,6 +80,12 @@ const UI: Record<
     quote: "申请报价",
     thinking: "思考中...",
     clear: "清除对话",
+    suggestionsLabel: "常见问题",
+    suggestions: [
+      "如何下载安全数据表 (SDS/MSDS)?",
+      "产品是否符合中国 MEE / 印度 BIS 要求?",
+      "运往亚洲主要港口的交期是多久?",
+    ],
   },
   fr: {
     open: "Ouvrir l'assistant IA",
@@ -67,6 +95,12 @@ const UI: Record<
     quote: "Demander un devis",
     thinking: "Je réfléchis...",
     clear: "Effacer la conversation",
+    suggestionsLabel: "Questions fréquentes",
+    suggestions: [
+      "Comment télécharger la fiche de données de sécurité (FDS) ?",
+      "Vos produits sont-ils conformes SONCAP / PVoC ?",
+      "Quels sont les délais de livraison vers l'Afrique ?",
+    ],
   },
   es: {
     open: "Abrir asistente IA",
@@ -76,6 +110,12 @@ const UI: Record<
     quote: "Solicitar cotización",
     thinking: "Pensando...",
     clear: "Borrar conversación",
+    suggestionsLabel: "Preguntas frecuentes",
+    suggestions: [
+      "¿Cómo descargo la hoja de datos de seguridad (HDS/SDS)?",
+      "¿Cumplen con NOM-018-STPS / ANVISA / Mercosur GHS?",
+      "¿Cuáles son los tiempos de entrega a Latinoamérica?",
+    ],
   },
 };
 
@@ -160,6 +200,11 @@ export const RegionChat = ({ region }: Props) => {
     sendMessage({ text });
   };
 
+  const handleSuggestion = (text: string) => {
+    if (isBusy) return;
+    sendMessage({ text });
+  };
+
   const handleClear = () => {
     setMessages([]);
     try {
@@ -219,8 +264,28 @@ export const RegionChat = ({ region }: Props) => {
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
             {messages.length === 0 && (
-              <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
-                {ui.greeting}
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
+                  {ui.greeting}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    {ui.suggestionsLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {ui.suggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSuggestion(s)}
+                        disabled={isBusy}
+                        className="text-xs text-left px-3 py-1.5 rounded-full border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition disabled:opacity-50"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Settings, LogOut, Menu, X, CreditCard, DollarSign, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, Menu, X, CreditCard, DollarSign, MessageSquare, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';

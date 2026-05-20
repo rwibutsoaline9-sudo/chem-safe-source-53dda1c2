@@ -81,6 +81,7 @@ const App = () => {
             <Route path="/admin/stripe-settings" element={<ProtectedRoute><StripeSettings /></ProtectedRoute>} />
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
+            <Route path="/admin/live-chat" element={<ProtectedRoute><AdminLiveChat /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

@@ -2,3 +2,6 @@ project_id = "lriwodanoclewwjrsimi"
 
 [functions.region-chat]
 verify_jwt = false
+
+[functions.site-chat-ai]
+verify_jwt = false

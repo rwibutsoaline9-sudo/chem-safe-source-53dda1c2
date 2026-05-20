@@ -20,7 +20,7 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
-import { WhatsAppButton } from "./components/WhatsAppButton";
+import { SiteChat } from "./components/SiteChat";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";
 import Dashboard from "./pages/admin/Dashboard";
@@ -29,6 +29,7 @@ import Settings from "./pages/admin/Settings";
 import StripeSettings from "./pages/admin/StripeSettings";
 import Payments from "./pages/admin/Payments";
 import AdminMessages from "./pages/admin/Messages";
+import AdminLiveChat from "./pages/admin/LiveChat";
 
 const queryClient = new QueryClient();
 
@@ -38,7 +39,7 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => (
     <Header />
     <main className="flex-1">{children}</main>
     <Footer />
-    <WhatsAppButton />
+    <SiteChat />
   </div>
 );
 
@@ -80,6 +81,7 @@ const App = () => {
             <Route path="/admin/stripe-settings" element={<ProtectedRoute><StripeSettings /></ProtectedRoute>} />
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
+            <Route path="/admin/live-chat" element={<ProtectedRoute><AdminLiveChat /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

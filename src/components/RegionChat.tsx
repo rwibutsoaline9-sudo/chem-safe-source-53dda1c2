@@ -200,6 +200,11 @@ export const RegionChat = ({ region }: Props) => {
     sendMessage({ text });
   };
 
+  const handleSuggestion = (text: string) => {
+    if (isBusy) return;
+    sendMessage({ text });
+  };
+
   const handleClear = () => {
     setMessages([]);
     try {

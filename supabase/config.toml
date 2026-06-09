@@ -3,5 +3,5 @@ project_id = "lriwodanoclewwjrsimi"
 [functions.region-chat]
 verify_jwt = false
 
-[functions.site-chat-ai]
+[functions.site-chat]
 verify_jwt = false

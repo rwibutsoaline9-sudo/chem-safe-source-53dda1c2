@@ -259,12 +259,14 @@ export const RegionChat = ({ region }: Props) => {
   };
 
   const handleClear = () => {
+    suppressNextPersistRef.current = true;
     setMessages([]);
     try {
       localStorage.removeItem(storageKey);
     } catch {
       /* ignore */
     }
+    bcRef.current?.postMessage({ from: tabIdRef.current, messages: [] });
   };
 
   return (

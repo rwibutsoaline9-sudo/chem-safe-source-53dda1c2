@@ -26,6 +26,15 @@ function getVisitorId(): string {
   return v;
 }
 
+async function callSiteChat<T = unknown>(payload: Record<string, unknown>): Promise<T | null> {
+  const { data, error } = await supabase.functions.invoke("site-chat", { body: payload });
+  if (error) {
+    console.error("site-chat error", error);
+    return null;
+  }
+  return data as T;
+}
+
 export const SiteChat = () => {
   const visitorId = useMemo(getVisitorId, []);
   const [open, setOpen] = useState(false);
@@ -39,44 +48,58 @@ export const SiteChat = () => {
   const [sending, setSending] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lastTimestampRef = useRef<string | null>(null);
 
-  // Load existing messages + subscribe to realtime updates
+  // Initial load when conversation becomes known
   useEffect(() => {
     if (!conversationId) return;
-
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("chat_messages")
-        .select("id, sender_type, content, created_at")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-      if (!cancelled && data) setMessages(data as Msg[]);
+      const res = await callSiteChat<{ messages: Msg[] }>({
+        action: "list_messages",
+        visitor_id: visitorId,
+        conversation_id: conversationId,
+      });
+      if (cancelled || !res?.messages) return;
+      setMessages(res.messages);
+      const last = res.messages[res.messages.length - 1];
+      if (last) lastTimestampRef.current = last.created_at;
     })();
-
-    const channel = supabase
-      .channel(`chat-${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "chat_messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const m = payload.new as Msg;
-          setMessages((prev) => (prev.find((p) => p.id === m.id) ? prev : [...prev, m]));
-          if (m.sender_type !== "visitor") setAiThinking(false);
-        },
-      )
-      .subscribe();
-
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, visitorId]);
+
+  // Poll for new messages while chat is open (admin/AI replies)
+  useEffect(() => {
+    if (!open || !conversationId) return;
+    let cancelled = false;
+
+    const tick = async () => {
+      const res = await callSiteChat<{ messages: Msg[] }>({
+        action: "list_messages",
+        visitor_id: visitorId,
+        conversation_id: conversationId,
+        since: lastTimestampRef.current,
+      });
+      if (cancelled || !res?.messages?.length) return;
+      setMessages((prev) => {
+        const seen = new Set(prev.map((m) => m.id));
+        const additions = res.messages.filter((m) => !seen.has(m.id));
+        if (!additions.length) return prev;
+        const incomingNonVisitor = additions.some((m) => m.sender_type !== "visitor");
+        if (incomingNonVisitor) setAiThinking(false);
+        return [...prev, ...additions];
+      });
+      lastTimestampRef.current = res.messages[res.messages.length - 1].created_at;
+    };
+
+    const interval = window.setInterval(tick, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [open, conversationId, visitorId]);
 
   // Auto-scroll
   useEffect(() => {
@@ -87,21 +110,18 @@ export const SiteChat = () => {
 
   async function ensureConversation(): Promise<string | null> {
     if (conversationId) return conversationId;
-    const { data, error } = await supabase
-      .from("chat_conversations")
-      .insert({
-        visitor_id: visitorId,
-        visitor_name: name || null,
-      })
-      .select("id")
-      .single();
-    if (error || !data) {
+    const res = await callSiteChat<{ conversation_id?: string }>({
+      action: "start",
+      visitor_id: visitorId,
+      visitor_name: name || null,
+    });
+    if (!res?.conversation_id) {
       toast.error("Could not start chat. Please try again.");
       return null;
     }
-    localStorage.setItem(CONVO_KEY, data.id);
-    setConversationId(data.id);
-    return data.id;
+    localStorage.setItem(CONVO_KEY, res.conversation_id);
+    setConversationId(res.conversation_id);
+    return res.conversation_id;
   }
 
   async function handleSend() {
@@ -129,54 +149,26 @@ export const SiteChat = () => {
         { id: tempId, sender_type: "visitor", content: text, created_at: new Date().toISOString() },
       ]);
       setInput("");
+      setAiThinking(true);
 
-      const { data: inserted, error } = await supabase
-        .from("chat_messages")
-        .insert({ conversation_id: convoId, sender_type: "visitor", content: text })
-        .select("id, sender_type, content, created_at")
-        .single();
+      const res = await callSiteChat<{ message?: Msg; ai_reply?: string | null }>({
+        action: "send_message",
+        visitor_id: visitorId,
+        conversation_id: convoId,
+        content: text,
+      });
 
-      if (error) {
+      if (!res?.message) {
         setMessages((p) => p.filter((m) => m.id !== tempId));
+        setAiThinking(false);
         toast.error("Message failed to send");
         return;
       }
 
-      // Replace temp with real
-      setMessages((p) => p.map((m) => (m.id === tempId ? (inserted as Msg) : m)));
-
-      // Update conversation activity + admin badge
-      await supabase
-        .from("chat_conversations")
-        .update({
-          last_message_at: new Date().toISOString(),
-        })
-        .eq("id", convoId);
-      // increment unread via RPC-less approach: read then write
-      const { data: cur } = await supabase
-        .from("chat_conversations")
-        .select("unread_admin, ai_enabled")
-        .eq("id", convoId)
-        .maybeSingle();
-      if (cur) {
-        await supabase
-          .from("chat_conversations")
-          .update({ unread_admin: (cur.unread_admin ?? 0) + 1 })
-          .eq("id", convoId);
-
-        // Trigger AI reply only if no admin has taken over
-        if (cur.ai_enabled) {
-          setAiThinking(true);
-          try {
-            await supabase.functions.invoke("site-chat-ai", {
-              body: { conversation_id: convoId, visitor_message: text },
-            });
-          } catch (e) {
-            console.error(e);
-            setAiThinking(false);
-          }
-        }
-      }
+      // Replace temp with real visitor message; AI reply (if any) will arrive via poll
+      setMessages((p) => p.map((m) => (m.id === tempId ? (res.message as Msg) : m)));
+      lastTimestampRef.current = res.message.created_at;
+      if (!res.ai_reply) setAiThinking(false);
     } finally {
       setSending(false);
     }

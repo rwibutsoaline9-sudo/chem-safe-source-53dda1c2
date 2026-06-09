@@ -170,14 +170,67 @@ export const RegionChat = ({ region }: Props) => {
     onError: (e) => toast.error(e.message || "Chat error"),
   });
 
-  // Persist on every change
+  // Tab identity + suppression flag to avoid echo loops
+  const tabIdRef = useRef<string>(
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2)
+  );
+  const suppressNextPersistRef = useRef(false);
+  const channelKey = `${storageKey}:bc`;
+  const bcRef = useRef<BroadcastChannel | null>(null);
+
+  // Persist on every change + broadcast to other tabs
   useEffect(() => {
+    if (suppressNextPersistRef.current) {
+      suppressNextPersistRef.current = false;
+      return;
+    }
     try {
-      localStorage.setItem(storageKey, JSON.stringify(messages));
+      const payload = JSON.stringify(messages);
+      localStorage.setItem(storageKey, payload);
+      // Notify other tabs (storage event fires only in *other* tabs)
+      bcRef.current?.postMessage({ from: tabIdRef.current, messages });
     } catch {
       /* ignore quota */
     }
   }, [messages, storageKey]);
+
+  // Cross-tab sync: BroadcastChannel (primary) + storage event (fallback)
+  useEffect(() => {
+    const applyRemote = (next: UIMessage[]) => {
+      suppressNextPersistRef.current = true;
+      setMessages(next);
+    };
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      bc = new BroadcastChannel(channelKey);
+      bcRef.current = bc;
+      bc.onmessage = (ev) => {
+        const data = ev.data as { from: string; messages: UIMessage[] } | null;
+        if (!data || data.from === tabIdRef.current) return;
+        if (Array.isArray(data.messages)) applyRemote(data.messages);
+      };
+    }
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== storageKey || !e.newValue) return;
+      try {
+        const next = JSON.parse(e.newValue);
+        if (Array.isArray(next)) applyRemote(next);
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      bc?.close();
+      bcRef.current = null;
+    };
+  }, [channelKey, storageKey, setMessages]);
 
   // Auto-scroll
   useEffect(() => {

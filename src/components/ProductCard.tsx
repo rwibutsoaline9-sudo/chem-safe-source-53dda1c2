@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getProductImage } from "@/lib/productImages";
+import { getProductImage, getProductImageStyle } from "@/lib/productImages";
 import { toSlug } from "@/lib/slug";
 
 interface Product {

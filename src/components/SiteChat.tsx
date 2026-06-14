@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MessageCircle, X, Send, Loader2, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -70,34 +72,58 @@ export const SiteChat = () => {
     };
   }, [conversationId, visitorId]);
 
-  // Poll for new messages while chat is open (admin/AI replies)
+  // Adaptive polling: only while open + tab visible, with backoff when idle
   useEffect(() => {
     if (!open || !conversationId) return;
     let cancelled = false;
+    let timer: number | undefined;
+    let delay = 2000;
+    const MIN = 2000;
+    const MAX = 15000;
 
     const tick = async () => {
+      if (cancelled) return;
+      if (document.hidden) {
+        timer = window.setTimeout(tick, 5000);
+        return;
+      }
       const res = await callSiteChat<{ messages: Msg[] }>({
         action: "list_messages",
         visitor_id: visitorId,
         conversation_id: conversationId,
         since: lastTimestampRef.current,
       });
-      if (cancelled || !res?.messages?.length) return;
-      setMessages((prev) => {
-        const seen = new Set(prev.map((m) => m.id));
-        const additions = res.messages.filter((m) => !seen.has(m.id));
-        if (!additions.length) return prev;
-        const incomingNonVisitor = additions.some((m) => m.sender_type !== "visitor");
-        if (incomingNonVisitor) setAiThinking(false);
-        return [...prev, ...additions];
-      });
-      lastTimestampRef.current = res.messages[res.messages.length - 1].created_at;
+      if (cancelled) return;
+      const incoming = res?.messages ?? [];
+      if (incoming.length) {
+        setMessages((prev) => {
+          const seen = new Set(prev.map((m) => m.id));
+          const additions = incoming.filter((m) => !seen.has(m.id));
+          if (!additions.length) return prev;
+          if (additions.some((m) => m.sender_type !== "visitor")) setAiThinking(false);
+          return [...prev, ...additions];
+        });
+        lastTimestampRef.current = incoming[incoming.length - 1].created_at;
+        delay = MIN;
+      } else {
+        delay = Math.min(MAX, Math.round(delay * 1.5));
+      }
+      timer = window.setTimeout(tick, delay);
     };
 
-    const interval = window.setInterval(tick, 3000);
+    timer = window.setTimeout(tick, delay);
+    const onVisible = () => {
+      if (!document.hidden) {
+        delay = MIN;
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(tick, 0);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      if (timer) window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [open, conversationId, visitorId]);
 
@@ -249,8 +275,28 @@ export const SiteChat = () => {
                         <span className="font-medium text-primary">Support team</span>
                       )}
                     </div>
-                    <div className="bg-muted text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2 text-sm whitespace-pre-wrap">
-                      {m.content}
+                    <div className="bg-muted text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2 text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-primary prose-a:underline">
+                      <ReactMarkdown
+                        components={{
+                          a: ({ href, children, ...props }) => {
+                            const isInternal = href?.startsWith("/");
+                            if (isInternal) {
+                              return (
+                                <Link to={href!} onClick={() => setOpen(false)}>
+                                  {children}
+                                </Link>
+                              );
+                            }
+                            return (
+                              <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                {children}
+                              </a>
+                            );
+                          },
+                        }}
+                      >
+                        {m.content}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </div>

@@ -153,6 +153,7 @@ const ProductDetail = () => {
                 <img 
                   src={imageSrc} 
                   alt={product.name}
+                  style={getProductImageStyle(product.name, product.image_url)}
                   className="w-full h-full object-cover"
                 />
               </div>

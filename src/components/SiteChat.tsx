@@ -275,8 +275,28 @@ export const SiteChat = () => {
                         <span className="font-medium text-primary">Support team</span>
                       )}
                     </div>
-                    <div className="bg-muted text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2 text-sm whitespace-pre-wrap">
-                      {m.content}
+                    <div className="bg-muted text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2 text-sm prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-primary prose-a:underline">
+                      <ReactMarkdown
+                        components={{
+                          a: ({ href, children, ...props }) => {
+                            const isInternal = href?.startsWith("/");
+                            if (isInternal) {
+                              return (
+                                <Link to={href!} onClick={() => setOpen(false)}>
+                                  {children}
+                                </Link>
+                              );
+                            }
+                            return (
+                              <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                {children}
+                              </a>
+                            );
+                          },
+                        }}
+                      >
+                        {m.content}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </div>

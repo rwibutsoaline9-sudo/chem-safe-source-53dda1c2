@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Download, Package, Beaker, FileText, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { getProductImage } from "@/lib/productImages";
+import { getProductImage, getProductImageStyle } from "@/lib/productImages";
 import { SEO } from "@/components/SEO";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ProductFAQ } from "@/components/ProductFAQ";
@@ -153,6 +153,7 @@ const ProductDetail = () => {
                 <img 
                   src={imageSrc} 
                   alt={product.name}
+                  style={getProductImageStyle(product.name, product.image_url)}
                   className="w-full h-full object-cover"
                 />
               </div>

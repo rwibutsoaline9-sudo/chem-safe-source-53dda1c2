@@ -74,3 +74,26 @@ export function getProductImage(imageUrl: string | null, category: string): stri
   // 3. Fall back to category-based image
   return categoryImageMap[category] || categorySalts;
 }
+
+/**
+ * Deterministic CSS filter per product so shared category images don't look
+ * identical across the catalog. Stable for a given product name.
+ */
+export function getProductImageStyle(
+  seed: string | null | undefined,
+  imageUrl?: string | null,
+): React.CSSProperties {
+  // If the product has its own uploaded image, leave it untouched.
+  if (imageUrl && (imageUrl.startsWith("http") || fileMap[imageUrl])) {
+    return {};
+  }
+  const s = (seed ?? "").toString();
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const hue = h % 360;
+  const sat = 0.85 + ((h >> 9) % 30) / 100; // 0.85 - 1.14
+  const bright = 0.92 + ((h >> 17) % 16) / 100; // 0.92 - 1.07
+  return {
+    filter: `hue-rotate(${hue}deg) saturate(${sat}) brightness(${bright})`,
+  };
+}

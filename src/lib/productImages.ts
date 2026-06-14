@@ -1,3 +1,4 @@
+import type React from "react";
 import categoryAcids from "@/assets/category-acids.jpg";
 import categoryAlkalis from "@/assets/category-alkalis.jpg";
 import categorySolvents from "@/assets/category-solvents.jpg";

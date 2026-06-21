@@ -106,11 +106,43 @@ const Products = () => {
     // Use the first uploaded image as image_url, store all in description or as first
     const image_url = imageUrls.length > 0 ? imageUrls[0] : null;
 
+    // Prevent reusing the same uploaded image across different product names
+    // unless the admin explicitly confirms the link.
+    if (image_url && image_url.includes('/storage/v1/object/public/product-images/')) {
+      const { data: dupes, error: dupeErr } = await supabase
+        .from('products')
+        .select('id, name')
+        .eq('image_url', image_url);
+
+      if (dupeErr) {
+        toast.error('Could not verify image uniqueness');
+        return;
+      }
+
+      const conflicts = (dupes || []).filter(
+        (p) =>
+          p.id !== editingProduct?.id &&
+          p.name.trim().toLowerCase() !== formData.name.trim().toLowerCase()
+      );
+
+      if (conflicts.length > 0) {
+        const names = conflicts.map((c) => `"${c.name}"`).join(', ');
+        const ok = window.confirm(
+          `This image is already used by a different product: ${names}.\n\n` +
+            `Reusing the same photo across different product names can mislead customers. ` +
+            `Click OK only if you explicitly want to link "${formData.name}" to the same image. ` +
+            `Otherwise click Cancel and upload a unique image.`
+        );
+        if (!ok) return;
+      }
+    }
+
     const productData = {
       ...formData,
       price_value: parseFloat(formData.price_value),
       image_url,
     };
+
 
     if (editingProduct) {
       const { error } = await supabase

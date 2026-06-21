@@ -30,6 +30,7 @@ import StripeSettings from "./pages/admin/StripeSettings";
 import Payments from "./pages/admin/Payments";
 import AdminMessages from "./pages/admin/Messages";
 import AdminLiveChat from "./pages/admin/LiveChat";
+import ImageSimilarity from "./pages/admin/ImageSimilarity";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
             <Route path="/admin/live-chat" element={<ProtectedRoute><AdminLiveChat /></ProtectedRoute>} />
+            <Route path="/admin/image-similarity" element={<ProtectedRoute><ImageSimilarity /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

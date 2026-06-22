@@ -191,10 +191,29 @@ export const SiteChat = () => {
         return;
       }
 
-      // Replace temp with real visitor message; AI reply (if any) will arrive via poll
+      // Replace temp with real visitor message
       setMessages((p) => p.map((m) => (m.id === tempId ? (res.message as Msg) : m)));
       lastTimestampRef.current = res.message.created_at;
-      if (!res.ai_reply) setAiThinking(false);
+
+      // If AI replied, fetch new messages immediately instead of waiting for poll tick
+      if (res.ai_reply) {
+        const fresh = await callSiteChat<{ messages: Msg[] }>({
+          action: "list_messages",
+          visitor_id: visitorId,
+          conversation_id: convoId,
+          since: res.message.created_at,
+        });
+        const incoming = fresh?.messages ?? [];
+        if (incoming.length) {
+          setMessages((prev) => {
+            const seen = new Set(prev.map((m) => m.id));
+            const additions = incoming.filter((m) => !seen.has(m.id));
+            return additions.length ? [...prev, ...additions] : prev;
+          });
+          lastTimestampRef.current = incoming[incoming.length - 1].created_at;
+        }
+      }
+      setAiThinking(false);
     } finally {
       setSending(false);
     }

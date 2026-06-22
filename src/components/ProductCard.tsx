@@ -36,6 +36,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             <img
               src={imageSrc}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               style={getProductImageStyle(product.name, product.image_url)}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />

@@ -25,7 +25,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const imageSrc = getProductImage(product.image_url, product.category);
+  const imageSrc = getProductImage(product.image_url, product.category, product.name);
   const productSlug = toSlug(product.name);
 
   return (

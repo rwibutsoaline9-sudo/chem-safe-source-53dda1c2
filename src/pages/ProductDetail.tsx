@@ -110,7 +110,7 @@ const ProductDetail = () => {
     );
   }
 
-  const imageSrc = getProductImage(product.image_url, product.category);
+  const imageSrc = getProductImage(product.image_url, product.category, product.name);
 
   const handleDownloadSDS = () => {
     toast.info("SDS download will be available upon quote request verification");

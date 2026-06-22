@@ -58,7 +58,7 @@ const ImageSimilarity = () => {
     const results: Hashed[] = [];
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
-      const url = getProductImage(p.image_url, p.category);
+      const url = getProductImage(p.image_url, p.category, p.name);
       const hash = await computeDHash(url);
       if (hash) results.push({ ...p, hash, resolvedUrl: url });
       setProgress(Math.round(((i + 1) / products.length) * 100));

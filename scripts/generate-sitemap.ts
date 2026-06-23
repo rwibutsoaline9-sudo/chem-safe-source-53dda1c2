@@ -2,6 +2,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
+import { COUNTRIES } from "../src/data/countries";
 
 const BASE_URL = "https://chem-safe-source.lovable.app";
 
@@ -27,6 +28,13 @@ const staticEntries: SitemapEntry[] = [
   { path: "/regions/asia", changefreq: "monthly", priority: "0.8" },
   { path: "/regions/africa", changefreq: "monthly", priority: "0.8" },
   { path: "/regions/latin-america", changefreq: "monthly", priority: "0.8" },
+  // Country index + per-country programmatic landing pages
+  { path: "/ship-to", changefreq: "monthly", priority: "0.8" },
+  ...COUNTRIES.map<SitemapEntry>((c) => ({
+    path: `/ship-to/${c.slug}`,
+    changefreq: "monthly",
+    priority: "0.7",
+  })),
 ];
 
 function toSlug(name: string): string {

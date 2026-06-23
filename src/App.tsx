@@ -20,6 +20,8 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
+import CountryLanding from "./pages/CountryLanding";
+import ShipToIndex from "./pages/ShipToIndex";
 import { SiteChat } from "./components/SiteChat";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";
@@ -67,6 +69,10 @@ const App = () => {
 
             {/* Regional landing pages (localized SEO) */}
             <Route path="/regions/:regionSlug" element={<PublicLayout><RegionLanding /></PublicLayout>} />
+
+            {/* Country-level programmatic landing pages */}
+            <Route path="/ship-to" element={<PublicLayout><ShipToIndex /></PublicLayout>} />
+            <Route path="/ship-to/:countrySlug" element={<PublicLayout><CountryLanding /></PublicLayout>} />
 
             {/* Checkout */}
             <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />

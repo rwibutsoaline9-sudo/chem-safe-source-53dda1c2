@@ -20,6 +20,8 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
+import CountryLanding from "./pages/CountryLanding";
+import ShipToIndex from "./pages/ShipToIndex";
 import { SiteChat } from "./components/SiteChat";
 import { PromoBanner } from "./components/PromoBanner";
 import BulkImport from "./pages/admin/BulkImport";

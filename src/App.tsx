@@ -70,6 +70,10 @@ const App = () => {
             {/* Regional landing pages (localized SEO) */}
             <Route path="/regions/:regionSlug" element={<PublicLayout><RegionLanding /></PublicLayout>} />
 
+            {/* Country-level programmatic landing pages */}
+            <Route path="/ship-to" element={<PublicLayout><ShipToIndex /></PublicLayout>} />
+            <Route path="/ship-to/:countrySlug" element={<PublicLayout><CountryLanding /></PublicLayout>} />
+
             {/* Checkout */}
             <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
 

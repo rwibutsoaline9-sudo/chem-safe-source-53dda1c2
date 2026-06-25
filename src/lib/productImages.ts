@@ -193,7 +193,6 @@ export function getProductImage(
 
   // Category placeholders should not repeat across cards; generate a unique
   // chemical product scene from the product name and category instead.
-  const key = (seed && seed.length > 0) ? seed : category || "product";
   return productVisualFor(key, category);
 }
 

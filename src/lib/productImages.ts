@@ -25,6 +25,11 @@ const genericCategoryFiles = new Set([
   "category-metal-salts.jpg",
 ]);
 
+function isGenericImageUrl(imageUrl: string | null): boolean {
+  if (!imageUrl) return false;
+  return genericCategoryFiles.has(imageUrl) || imageUrl.includes("images.unsplash.com/");
+}
+
 const productNameAssets: Array<[RegExp, string]> = [
   [/\burea\b/i, productUrea],
   [/sodium cyanide/i, productSodiumCyanide],
@@ -185,11 +190,11 @@ export function getProductImage(
   category: string,
   seed?: string | null,
 ): string {
-  if (imageUrl && imageUrl.startsWith("http")) return imageUrl;
+  if (imageUrl && imageUrl.startsWith("http") && !isGenericImageUrl(imageUrl)) return imageUrl;
   if (imageUrl && fileMap[imageUrl]) return fileMap[imageUrl];
   const key = (seed && seed.length > 0) ? seed : category || "product";
   const productAsset = pickProductAsset(key);
-  if (productAsset && (!imageUrl || genericCategoryFiles.has(imageUrl))) return productAsset;
+  if (productAsset && (!imageUrl || isGenericImageUrl(imageUrl))) return productAsset;
 
   // Category placeholders should not repeat across cards; generate a unique
   // chemical product scene from the product name and category instead.

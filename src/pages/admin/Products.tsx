@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, FolderOpen, Camera } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { ImageLibraryPicker } from '@/components/admin/ImageLibraryPicker';
+import { QuickImageEditor } from '@/components/admin/QuickImageEditor';
 
 const SUPABASE_URL = "https://lriwodanoclewwjrsimi.supabase.co";
 
@@ -36,6 +38,8 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [quickEditProduct, setQuickEditProduct] = useState<Product | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -337,6 +341,16 @@ const Products = () => {
                     )}
                   </div>
 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setLibraryOpen(true)}
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Choose from image library
+                  </Button>
+
                   {imageUrls.length > 0 && (
                     <div className="grid grid-cols-3 gap-3 mt-3">
                       {imageUrls.map((url, index) => (
@@ -452,6 +466,14 @@ const Products = () => {
                         <Button
                           variant="outline"
                           size="icon"
+                          title="Change image"
+                          onClick={() => setQuickEditProduct(product)}
+                        >
+                          <Camera className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
                           onClick={() => handleEdit(product)}
                         >
                           <Pencil className="h-4 w-4" />
@@ -472,6 +494,20 @@ const Products = () => {
           </div>
         )}
       </div>
+
+      <ImageLibraryPicker
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        currentUrl={imageUrls[0]}
+        onSelect={(url) => setImageUrls((prev) => [url, ...prev.filter((u) => u !== url)])}
+      />
+
+      <QuickImageEditor
+        open={!!quickEditProduct}
+        onOpenChange={(o) => !o && setQuickEditProduct(null)}
+        product={quickEditProduct}
+        onSaved={fetchProducts}
+      />
     </AdminLayout>
   );
 };

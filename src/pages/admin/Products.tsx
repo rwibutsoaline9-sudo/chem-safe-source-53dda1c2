@@ -466,6 +466,14 @@ const Products = () => {
                         <Button
                           variant="outline"
                           size="icon"
+                          title="Change image"
+                          onClick={() => setQuickEditProduct(product)}
+                        >
+                          <Camera className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
                           onClick={() => handleEdit(product)}
                         >
                           <Pencil className="h-4 w-4" />
@@ -486,6 +494,20 @@ const Products = () => {
           </div>
         )}
       </div>
+
+      <ImageLibraryPicker
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        currentUrl={imageUrls[0]}
+        onSelect={(url) => setImageUrls((prev) => [url, ...prev.filter((u) => u !== url)])}
+      />
+
+      <QuickImageEditor
+        open={!!quickEditProduct}
+        onOpenChange={(o) => !o && setQuickEditProduct(null)}
+        product={quickEditProduct}
+        onSaved={fetchProducts}
+      />
     </AdminLayout>
   );
 };

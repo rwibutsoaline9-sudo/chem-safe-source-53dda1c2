@@ -38,6 +38,8 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [quickEditProduct, setQuickEditProduct] = useState<Product | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({

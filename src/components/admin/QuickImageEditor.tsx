@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Loader2, ImageIcon, FolderOpen, Trash2 } from "lucide-react";
+import { Upload, Loader2, FolderOpen, Trash2, Maximize2 } from "lucide-react";
 import { ImageLibraryPicker } from "./ImageLibraryPicker";
 import { getProductImage } from "@/lib/productImages";
 
@@ -27,6 +27,9 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const [saving, setSaving] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState<string | null | undefined>(undefined);
+  const [previewLoading, setPreviewLoading] = useState(true);
+  const [previewError, setPreviewError] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   if (!product) return null;
 
@@ -36,6 +39,12 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
       ? currentUrl
       : getProductImage(currentUrl, product.category, product.name)
     : getProductImage(null, product.category, product.name);
+
+  // Reset load state when the source changes.
+  useEffect(() => {
+    setPreviewLoading(true);
+    setPreviewError(false);
+  }, [previewSrc]);
 
   const handleUpload = async (files: FileList) => {
     const file = files[0];
@@ -62,7 +71,6 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
       return;
     }
 
-    // Duplicate check
     if (pendingUrl && pendingUrl.includes("/storage/v1/object/public/product-images/")) {
       const { data: dupes } = await supabase
         .from("products")
@@ -94,17 +102,74 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
     }
   };
 
+  const sourceLabel = !currentUrl
+    ? "Auto-generated"
+    : currentUrl.includes("/storage/v1/object/public/product-images/")
+      ? "Uploaded (Supabase)"
+      : currentUrl.startsWith("http")
+        ? "External URL"
+        : "Bundled asset";
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Set image — {product.name}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="w-full aspect-video rounded-lg overflow-hidden bg-muted border">
-              <img src={previewSrc} alt={product.name} className="w-full h-full object-cover" />
+            <div className="relative w-full rounded-lg overflow-hidden bg-muted border" style={{ aspectRatio: "4 / 3" }}>
+              {previewLoading && !previewError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted/70 backdrop-blur-sm z-10">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Loading full-size preview...</span>
+                </div>
+              )}
+              {previewError && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-destructive p-4 text-center">
+                  Image failed to load. Try a different source.
+                </div>
+              )}
+              <img
+                key={previewSrc}
+                src={previewSrc}
+                alt={product.name}
+                className="w-full h-full object-contain bg-background"
+                onLoad={() => setPreviewLoading(false)}
+                onError={() => {
+                  setPreviewLoading(false);
+                  setPreviewError(true);
+                }}
+              />
+              {!previewLoading && !previewError && (
+                <button
+                  type="button"
+                  onClick={() => setFullscreen(true)}
+                  className="absolute bottom-2 right-2 bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
+                  aria-label="View fullscreen"
+                  title="View fullscreen"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                Source: <span className="font-medium text-foreground">{sourceLabel}</span>
+              </span>
+              {currentUrl && currentUrl.startsWith("http") && (
+                <a
+                  href={currentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground truncate max-w-[60%]"
+                  title={currentUrl}
+                >
+                  Open original
+                </a>
+              )}
             </div>
 
             <input
@@ -129,11 +194,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
                 )}
                 Upload new
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setLibraryOpen(true)}
-              >
+              <Button type="button" variant="outline" onClick={() => setLibraryOpen(true)}>
                 <FolderOpen className="h-4 w-4 mr-2" />
                 Choose from library
               </Button>
@@ -161,7 +222,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
               >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={saving || pendingUrl === undefined}>
+              <Button onClick={handleSave} disabled={saving || pendingUrl === undefined || previewLoading}>
                 {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                 Save
               </Button>
@@ -176,6 +237,19 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
         currentUrl={currentUrl}
         onSelect={(url) => setPendingUrl(url)}
       />
+
+      <Dialog open={fullscreen} onOpenChange={setFullscreen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Fullscreen preview — {product.name}</DialogTitle>
+          </DialogHeader>
+          <img
+            src={previewSrc}
+            alt={product.name}
+            className="w-full h-full max-h-[90vh] object-contain"
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -151,15 +151,31 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
                 }}
               />
               {!previewLoading && !previewError && (
-                <button
-                  type="button"
-                  onClick={() => setFullscreen(true)}
-                  className="absolute bottom-2 right-2 bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
-                  aria-label="View fullscreen"
-                  title="View fullscreen"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </button>
+                <div className="absolute bottom-2 right-2 flex gap-1">
+                  {hasChange && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSlider(50);
+                        setCompareOpen(true);
+                      }}
+                      className="bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
+                      aria-label="Compare before / after"
+                      title="Compare before / after"
+                    >
+                      <SplitSquareHorizontal className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setFullscreen(true)}
+                    className="bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
+                    aria-label="View fullscreen"
+                    title="View fullscreen"
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </button>
+                </div>
               )}
             </div>
 

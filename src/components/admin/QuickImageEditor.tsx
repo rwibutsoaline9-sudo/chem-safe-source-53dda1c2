@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Loader2, FolderOpen, Trash2, Maximize2 } from "lucide-react";
+import { Upload, Loader2, FolderOpen, Trash2, Maximize2, SplitSquareHorizontal } from "lucide-react";
 import { ImageLibraryPicker } from "./ImageLibraryPicker";
 import { getProductImage } from "@/lib/productImages";
 

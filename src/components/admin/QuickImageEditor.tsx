@@ -48,6 +48,23 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const previewSrc = resolveSrc(currentUrl);
   const hasChange = pendingUrl !== undefined && pendingUrl !== originalUrl;
 
+  const confirmDiscard = (message = "You have an unsaved image change. Discard it?") =>
+    !hasChange || window.confirm(message);
+
+  const requestClose = () => {
+    if (confirmDiscard("Close without saving your image change?")) {
+      setPendingUrl(undefined);
+      onOpenChange(false);
+    }
+  };
+
+  const requestSetPending = (url: string | null) => {
+    if (hasChange && pendingUrl !== url) {
+      if (!window.confirm("Replace your current pending image change with this one?")) return;
+    }
+    setPendingUrl(url);
+  };
+
   // Reset load state when the source changes.
   useEffect(() => {
     setPreviewLoading(true);

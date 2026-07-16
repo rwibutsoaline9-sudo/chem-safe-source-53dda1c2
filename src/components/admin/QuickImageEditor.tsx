@@ -250,7 +250,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
                 type="button"
                 variant="ghost"
                 className="w-full text-destructive hover:text-destructive"
-                onClick={() => setPendingUrl(null)}
+                onClick={() => requestSetPending(null)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear image (use auto-generated)
@@ -280,10 +280,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setPendingUrl(undefined);
-                  onOpenChange(false);
-                }}
+                onClick={requestClose}
               >
                 Cancel
               </Button>
@@ -300,7 +297,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
         currentUrl={currentUrl}
-        onSelect={(url) => setPendingUrl(url)}
+        onSelect={(url) => requestSetPending(url)}
       />
 
       <Dialog open={fullscreen} onOpenChange={setFullscreen}>

@@ -74,6 +74,10 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const handleUpload = async (files: FileList) => {
     const file = files[0];
     if (!file) return;
+    if (hasChange && !window.confirm("Replace your current pending image change with this upload?")) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setUploading(true);
     const ext = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;

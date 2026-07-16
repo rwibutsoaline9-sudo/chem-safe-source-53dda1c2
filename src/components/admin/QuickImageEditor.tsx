@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Loader2, FolderOpen, Trash2, Maximize2 } from "lucide-react";
+import { Upload, Loader2, FolderOpen, Trash2, Maximize2, SplitSquareHorizontal } from "lucide-react";
 import { ImageLibraryPicker } from "./ImageLibraryPicker";
 import { getProductImage } from "@/lib/productImages";
 
@@ -30,15 +30,23 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const [previewLoading, setPreviewLoading] = useState(true);
   const [previewError, setPreviewError] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [slider, setSlider] = useState(50);
 
   if (!product) return null;
 
-  const currentUrl = pendingUrl !== undefined ? pendingUrl : product.image_url;
-  const previewSrc = currentUrl
-    ? currentUrl.startsWith("http")
-      ? currentUrl
-      : getProductImage(currentUrl, product.category, product.name)
-    : getProductImage(null, product.category, product.name);
+  const resolveSrc = (url: string | null | undefined) =>
+    url
+      ? url.startsWith("http")
+        ? url
+        : getProductImage(url, product.category, product.name)
+      : getProductImage(null, product.category, product.name);
+
+  const originalUrl = product.image_url;
+  const originalSrc = resolveSrc(originalUrl);
+  const currentUrl = pendingUrl !== undefined ? pendingUrl : originalUrl;
+  const previewSrc = resolveSrc(currentUrl);
+  const hasChange = pendingUrl !== undefined && pendingUrl !== originalUrl;
 
   // Reset load state when the source changes.
   useEffect(() => {
@@ -143,15 +151,31 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
                 }}
               />
               {!previewLoading && !previewError && (
-                <button
-                  type="button"
-                  onClick={() => setFullscreen(true)}
-                  className="absolute bottom-2 right-2 bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
-                  aria-label="View fullscreen"
-                  title="View fullscreen"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </button>
+                <div className="absolute bottom-2 right-2 flex gap-1">
+                  {hasChange && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSlider(50);
+                        setCompareOpen(true);
+                      }}
+                      className="bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
+                      aria-label="Compare before / after"
+                      title="Compare before / after"
+                    >
+                      <SplitSquareHorizontal className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setFullscreen(true)}
+                    className="bg-background/90 border rounded-md p-1.5 hover:bg-background shadow-sm"
+                    aria-label="View fullscreen"
+                    title="View fullscreen"
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -212,6 +236,26 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
               </Button>
             )}
 
+            {hasChange && (
+              <div className="rounded-md border bg-muted/40 p-2 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Pending change — review before saving.
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setSlider(50);
+                    setCompareOpen(true);
+                  }}
+                >
+                  <SplitSquareHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                  Compare before / after
+                </Button>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button
                 variant="outline"
@@ -248,6 +292,116 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
             alt={product.name}
             className="w-full h-full max-h-[90vh] object-contain"
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Compare — {product.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Side-by-side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">Before</span>
+                  <span className="text-muted-foreground">
+                    {originalUrl ? "Current saved" : "Auto-generated"}
+                  </span>
+                </div>
+                <div
+                  className="relative w-full rounded-md overflow-hidden bg-muted border"
+                  style={{ aspectRatio: "4 / 3" }}
+                >
+                  <img
+                    src={originalSrc}
+                    alt="Before"
+                    className="w-full h-full object-contain bg-background"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">After</span>
+                  <span className="text-muted-foreground">{sourceLabel}</span>
+                </div>
+                <div
+                  className="relative w-full rounded-md overflow-hidden bg-muted border ring-2 ring-primary/40"
+                  style={{ aspectRatio: "4 / 3" }}
+                >
+                  <img
+                    src={previewSrc}
+                    alt="After"
+                    className="w-full h-full object-contain bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Slider overlay */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium">Slider overlay</span>
+                <span className="text-muted-foreground">Drag to reveal after</span>
+              </div>
+              <div
+                className="relative w-full rounded-md overflow-hidden bg-muted border select-none"
+                style={{ aspectRatio: "16 / 9" }}
+              >
+                <img
+                  src={originalSrc}
+                  alt="Before overlay"
+                  className="absolute inset-0 w-full h-full object-contain bg-background"
+                  draggable={false}
+                />
+                <div
+                  className="absolute inset-0 overflow-hidden"
+                  style={{ clipPath: `inset(0 0 0 ${slider}%)` }}
+                >
+                  <img
+                    src={previewSrc}
+                    alt="After overlay"
+                    className="absolute inset-0 w-full h-full object-contain bg-background"
+                    draggable={false}
+                  />
+                </div>
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-primary pointer-events-none"
+                  style={{ left: `${slider}%` }}
+                />
+                <span className="absolute top-2 left-2 text-[10px] font-medium px-1.5 py-0.5 rounded bg-background/90 border">
+                  Before
+                </span>
+                <span className="absolute top-2 right-2 text-[10px] font-medium px-1.5 py-0.5 rounded bg-background/90 border">
+                  After
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={slider}
+                onChange={(e) => setSlider(Number(e.target.value))}
+                className="w-full accent-primary"
+                aria-label="Compare slider"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPendingUrl(undefined);
+                  setCompareOpen(false);
+                }}
+              >
+                Discard change
+              </Button>
+              <Button onClick={() => setCompareOpen(false)}>Looks good</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

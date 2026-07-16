@@ -48,6 +48,23 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const previewSrc = resolveSrc(currentUrl);
   const hasChange = pendingUrl !== undefined && pendingUrl !== originalUrl;
 
+  const confirmDiscard = (message = "You have an unsaved image change. Discard it?") =>
+    !hasChange || window.confirm(message);
+
+  const requestClose = () => {
+    if (confirmDiscard("Close without saving your image change?")) {
+      setPendingUrl(undefined);
+      onOpenChange(false);
+    }
+  };
+
+  const requestSetPending = (url: string | null) => {
+    if (hasChange && pendingUrl !== url) {
+      if (!window.confirm("Replace your current pending image change with this one?")) return;
+    }
+    setPendingUrl(url);
+  };
+
   // Reset load state when the source changes.
   useEffect(() => {
     setPreviewLoading(true);
@@ -57,6 +74,10 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const handleUpload = async (files: FileList) => {
     const file = files[0];
     if (!file) return;
+    if (hasChange && !window.confirm("Replace your current pending image change with this upload?")) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setUploading(true);
     const ext = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
@@ -120,7 +141,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(next) => { if (!next) requestClose(); else onOpenChange(true); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Set image — {product.name}</DialogTitle>
@@ -229,7 +250,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
                 type="button"
                 variant="ghost"
                 className="w-full text-destructive hover:text-destructive"
-                onClick={() => setPendingUrl(null)}
+                onClick={() => requestSetPending(null)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear image (use auto-generated)
@@ -259,10 +280,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setPendingUrl(undefined);
-                  onOpenChange(false);
-                }}
+                onClick={requestClose}
               >
                 Cancel
               </Button>
@@ -279,7 +297,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
         currentUrl={currentUrl}
-        onSelect={(url) => setPendingUrl(url)}
+        onSelect={(url) => requestSetPending(url)}
       />
 
       <Dialog open={fullscreen} onOpenChange={setFullscreen}>

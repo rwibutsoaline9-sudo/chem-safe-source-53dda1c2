@@ -141,7 +141,7 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(next) => { if (!next) requestClose(); else onOpenChange(true); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Set image — {product.name}</DialogTitle>

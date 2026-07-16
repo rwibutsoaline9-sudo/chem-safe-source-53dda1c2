@@ -294,6 +294,116 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
           />
         </DialogContent>
       </Dialog>
+
+      <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Compare — {product.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Side-by-side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">Before</span>
+                  <span className="text-muted-foreground">
+                    {originalUrl ? "Current saved" : "Auto-generated"}
+                  </span>
+                </div>
+                <div
+                  className="relative w-full rounded-md overflow-hidden bg-muted border"
+                  style={{ aspectRatio: "4 / 3" }}
+                >
+                  <img
+                    src={originalSrc}
+                    alt="Before"
+                    className="w-full h-full object-contain bg-background"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">After</span>
+                  <span className="text-muted-foreground">{sourceLabel}</span>
+                </div>
+                <div
+                  className="relative w-full rounded-md overflow-hidden bg-muted border ring-2 ring-primary/40"
+                  style={{ aspectRatio: "4 / 3" }}
+                >
+                  <img
+                    src={previewSrc}
+                    alt="After"
+                    className="w-full h-full object-contain bg-background"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Slider overlay */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium">Slider overlay</span>
+                <span className="text-muted-foreground">Drag to reveal after</span>
+              </div>
+              <div
+                className="relative w-full rounded-md overflow-hidden bg-muted border select-none"
+                style={{ aspectRatio: "16 / 9" }}
+              >
+                <img
+                  src={originalSrc}
+                  alt="Before overlay"
+                  className="absolute inset-0 w-full h-full object-contain bg-background"
+                  draggable={false}
+                />
+                <div
+                  className="absolute inset-0 overflow-hidden"
+                  style={{ clipPath: `inset(0 0 0 ${slider}%)` }}
+                >
+                  <img
+                    src={previewSrc}
+                    alt="After overlay"
+                    className="absolute inset-0 w-full h-full object-contain bg-background"
+                    draggable={false}
+                  />
+                </div>
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-primary pointer-events-none"
+                  style={{ left: `${slider}%` }}
+                />
+                <span className="absolute top-2 left-2 text-[10px] font-medium px-1.5 py-0.5 rounded bg-background/90 border">
+                  Before
+                </span>
+                <span className="absolute top-2 right-2 text-[10px] font-medium px-1.5 py-0.5 rounded bg-background/90 border">
+                  After
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={slider}
+                onChange={(e) => setSlider(Number(e.target.value))}
+                className="w-full accent-primary"
+                aria-label="Compare slider"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPendingUrl(undefined);
+                  setCompareOpen(false);
+                }}
+              >
+                Discard change
+              </Button>
+              <Button onClick={() => setCompareOpen(false)}>Looks good</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

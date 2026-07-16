@@ -30,15 +30,23 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const [previewLoading, setPreviewLoading] = useState(true);
   const [previewError, setPreviewError] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [slider, setSlider] = useState(50);
 
   if (!product) return null;
 
-  const currentUrl = pendingUrl !== undefined ? pendingUrl : product.image_url;
-  const previewSrc = currentUrl
-    ? currentUrl.startsWith("http")
-      ? currentUrl
-      : getProductImage(currentUrl, product.category, product.name)
-    : getProductImage(null, product.category, product.name);
+  const resolveSrc = (url: string | null | undefined) =>
+    url
+      ? url.startsWith("http")
+        ? url
+        : getProductImage(url, product.category, product.name)
+      : getProductImage(null, product.category, product.name);
+
+  const originalUrl = product.image_url;
+  const originalSrc = resolveSrc(originalUrl);
+  const currentUrl = pendingUrl !== undefined ? pendingUrl : originalUrl;
+  const previewSrc = resolveSrc(currentUrl);
+  const hasChange = pendingUrl !== undefined && pendingUrl !== originalUrl;
 
   // Reset load state when the source changes.
   useEffect(() => {

@@ -236,6 +236,26 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
               </Button>
             )}
 
+            {hasChange && (
+              <div className="rounded-md border bg-muted/40 p-2 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Pending change — review before saving.
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setSlider(50);
+                    setCompareOpen(true);
+                  }}
+                >
+                  <SplitSquareHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                  Compare before / after
+                </Button>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button
                 variant="outline"

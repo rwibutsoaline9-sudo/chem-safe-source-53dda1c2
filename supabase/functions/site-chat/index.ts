@@ -249,15 +249,17 @@ async function generateAiReply(conversationId: string): Promise<string | null> {
     });
 
     const { text } = await generateText({
-      model: provider("google/gemini-3-flash-preview"),
+      model: provider("google/gemini-3.6-flash"),
       system: SYSTEM_PROMPT,
       messages,
       tools: {
         search_products: searchProductsTool,
         get_product_details: getProductDetailsTool,
+        list_related_products: listRelatedProductsTool,
       },
       stopWhen: stepCountIs(50),
     });
+
 
     const reply = text?.trim() ||
       "I'm here — could you share a bit more so I can help?";

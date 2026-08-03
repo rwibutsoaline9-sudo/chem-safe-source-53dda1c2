@@ -153,11 +153,11 @@ function realPhotoFor(seed: string, category: string): string {
   const key = `${seed || "industrial chemical"}|${category || "catalog"}`;
   const hash = hashString(key);
   const scene = sceneTypeFor(seed, category);
-  const tags = sceneTags[scene];
-  // `lock` guarantees the same photo is returned for the same seed every time,
-  // and different seeds get different photos.
-  return `https://loremflickr.com/800/520/${encodeURIComponent(tags)}/all?lock=${hash}`;
+  const options = scenePhotos[scene];
+  // Deterministic pick: the same product always resolves to the same photo.
+  return options[hash % options.length];
 }
+
 
 /**
  * Get the best image for a product.

@@ -2,18 +2,31 @@ import type React from "react";
 import productUrea from "@/assets/product-urea.jpg";
 import productSodiumCyanide from "@/assets/product-sodium-cyanide.jpg";
 import productCausticSoda from "@/assets/product-caustic-soda.jpg";
+import sceneDrums from "@/assets/scene-drums.jpg";
+import scenePowder from "@/assets/scene-powder.jpg";
+import sceneCrystals from "@/assets/scene-crystals.jpg";
+import sceneGas from "@/assets/scene-gas.jpg";
+import sceneHazard from "@/assets/scene-hazard.jpg";
+import scenePlant from "@/assets/scene-plant.jpg";
+import sceneLab from "@/assets/scene-lab.jpg";
+import scenePellets from "@/assets/scene-pellets.jpg";
+import sceneTotes from "@/assets/scene-totes.jpg";
+import scenePigment from "@/assets/scene-pigment.jpg";
+import sceneAcid from "@/assets/scene-acid.jpg";
+import sceneSacks from "@/assets/scene-sacks.jpg";
 
 // Real product photos. Uploaded images are used verbatim. Otherwise we serve a
-// real photograph from LoremFlickr, tagged by scene type so the picture matches
-// the chemical (drums for solvents, powder for salts, cylinders for gases, …)
-// and locked to a deterministic hash of the product name so every SKU gets a
-// unique image that never changes between renders.
+// curated, locally hosted photograph matched to the chemical's scene type
+// (drums for solvents, sacks for fertilizers, cylinders for gases, …) and
+// selected with a deterministic hash of the product name so every SKU keeps a
+// stable, context-appropriate picture.
 
 const fileMap: Record<string, string> = {
   "product-urea.jpg": productUrea,
   "product-sodium-cyanide.jpg": productSodiumCyanide,
   "product-caustic-soda.jpg": productCausticSoda,
 };
+
 
 const genericCategoryFiles = new Set([
   "category-acids.jpg",
@@ -65,33 +78,35 @@ type SceneType =
   | "lab"
   | "plant";
 
-// LoremFlickr tag sets tuned per scene. Multiple tags narrow the photo topic.
-const sceneTags: Record<SceneType, string> = {
-  toxic: "chemical,hazard,warning,barrel",
-  aromatic: "chemistry,reactor,industrial",
-  alkali: "flakes,white,chemical,powder",
-  fertilizer: "fertilizer,sack,agriculture",
-  acid: "chemical,tank,industrial,liquid",
-  amine: "industrial,tank,pipeline",
-  corrosive: "drum,chemical,warning",
-  peroxide: "bottle,chemical,laboratory",
-  salts: "salt,crystal,mineral,white",
-  carbonate: "powder,sack,mineral",
-  metal: "crystal,mineral,copper,blue",
-  oxide: "powder,pigment,white,industrial",
-  boron: "mineral,crystal,box",
-  preservative: "bottle,pharmaceutical,laboratory",
-  "organic-acid": "crystal,white,chemistry",
-  solvent: "drum,barrel,industrial",
-  alcohol: "bottle,glass,liquid,laboratory",
-  glycol: "liquid,industrial,tank",
-  gas: "gas,cylinder,industrial",
-  surfactant: "foam,soap,detergent,bubble",
-  polymer: "pellets,plastic,granules,industrial",
-  resin: "resin,epoxy,pail,industrial",
-  lab: "laboratory,flask,chemistry,glassware",
-  plant: "factory,industrial,plant,refinery",
+// Curated local photo sets per scene. Several candidates per scene so similar
+// chemicals still get visually distinct cards.
+const scenePhotos: Record<SceneType, string[]> = {
+  toxic: [sceneHazard, sceneDrums],
+  aromatic: [scenePlant, sceneDrums],
+  alkali: [scenePowder, sceneCrystals],
+  fertilizer: [sceneSacks, scenePowder],
+  acid: [sceneAcid, sceneTotes],
+  amine: [sceneTotes, scenePlant],
+  corrosive: [sceneHazard, sceneTotes],
+  peroxide: [sceneAcid, sceneLab],
+  salts: [sceneCrystals, scenePowder],
+  carbonate: [scenePowder, sceneSacks],
+  metal: [scenePigment, sceneCrystals],
+  oxide: [scenePigment, scenePowder],
+  boron: [sceneCrystals, sceneSacks],
+  preservative: [sceneLab, sceneAcid],
+  "organic-acid": [sceneCrystals, sceneLab],
+  solvent: [sceneDrums, sceneTotes],
+  alcohol: [sceneAcid, sceneDrums],
+  glycol: [sceneTotes, sceneDrums],
+  gas: [sceneGas, scenePlant],
+  surfactant: [sceneTotes, scenePowder],
+  polymer: [scenePellets, sceneSacks],
+  resin: [scenePellets, sceneDrums],
+  lab: [sceneLab, sceneAcid],
+  plant: [scenePlant, sceneGas],
 };
+
 
 function hashString(value: string): number {
   let hash = 2166136261;
@@ -138,11 +153,11 @@ function realPhotoFor(seed: string, category: string): string {
   const key = `${seed || "industrial chemical"}|${category || "catalog"}`;
   const hash = hashString(key);
   const scene = sceneTypeFor(seed, category);
-  const tags = sceneTags[scene];
-  // `lock` guarantees the same photo is returned for the same seed every time,
-  // and different seeds get different photos.
-  return `https://loremflickr.com/800/520/${encodeURIComponent(tags)}/all?lock=${hash}`;
+  const options = scenePhotos[scene];
+  // Deterministic pick: the same product always resolves to the same photo.
+  return options[hash % options.length];
 }
+
 
 /**
  * Get the best image for a product.

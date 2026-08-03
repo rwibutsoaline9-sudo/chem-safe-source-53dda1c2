@@ -2,18 +2,31 @@ import type React from "react";
 import productUrea from "@/assets/product-urea.jpg";
 import productSodiumCyanide from "@/assets/product-sodium-cyanide.jpg";
 import productCausticSoda from "@/assets/product-caustic-soda.jpg";
+import sceneDrums from "@/assets/scene-drums.jpg";
+import scenePowder from "@/assets/scene-powder.jpg";
+import sceneCrystals from "@/assets/scene-crystals.jpg";
+import sceneGas from "@/assets/scene-gas.jpg";
+import sceneHazard from "@/assets/scene-hazard.jpg";
+import scenePlant from "@/assets/scene-plant.jpg";
+import sceneLab from "@/assets/scene-lab.jpg";
+import scenePellets from "@/assets/scene-pellets.jpg";
+import sceneTotes from "@/assets/scene-totes.jpg";
+import scenePigment from "@/assets/scene-pigment.jpg";
+import sceneAcid from "@/assets/scene-acid.jpg";
+import sceneSacks from "@/assets/scene-sacks.jpg";
 
 // Real product photos. Uploaded images are used verbatim. Otherwise we serve a
-// real photograph from LoremFlickr, tagged by scene type so the picture matches
-// the chemical (drums for solvents, powder for salts, cylinders for gases, …)
-// and locked to a deterministic hash of the product name so every SKU gets a
-// unique image that never changes between renders.
+// curated, locally hosted photograph matched to the chemical's scene type
+// (drums for solvents, sacks for fertilizers, cylinders for gases, …) and
+// selected with a deterministic hash of the product name so every SKU keeps a
+// stable, context-appropriate picture.
 
 const fileMap: Record<string, string> = {
   "product-urea.jpg": productUrea,
   "product-sodium-cyanide.jpg": productSodiumCyanide,
   "product-caustic-soda.jpg": productCausticSoda,
 };
+
 
 const genericCategoryFiles = new Set([
   "category-acids.jpg",

@@ -182,6 +182,42 @@ const getProductDetailsTool = tool({
   },
 });
 
+const listRelatedProductsTool = tool({
+  description:
+    "List other catalog products in the same category (optionally excluding one slug). Use to offer honest alternatives, comparable grades, or complementary chemicals.",
+  inputSchema: z.object({
+    category: z.string().min(1).describe("Category to browse"),
+    exclude_slug: z.string().optional(),
+  }),
+  execute: async ({ category, exclude_slug }) => {
+    const like = `%${category.trim().replace(/[%_]/g, "")}%`;
+    let query = supabase
+      .from("products")
+      .select(
+        "slug, name, category, purity, grade, price_value, price_unit, price_currency, is_restricted",
+      )
+      .ilike("category", like)
+      .limit(6);
+    if (exclude_slug) query = query.neq("slug", exclude_slug);
+    const { data, error } = await query;
+    if (error) return { error: error.message, results: [] };
+    return {
+      count: data?.length ?? 0,
+      results: (data ?? []).map((p) => ({
+        slug: p.slug,
+        name: p.name,
+        purity: p.purity,
+        grade: p.grade,
+        price: p.price_value
+          ? `${p.price_currency ?? "USD"} ${p.price_value}/${p.price_unit ?? "unit"}`
+          : null,
+        restricted: p.is_restricted,
+        url: `/products/${p.slug}`,
+      })),
+    };
+  },
+});
+
 // --- AI reply ---------------------------------------------------------------
 
 async function generateAiReply(conversationId: string): Promise<string | null> {
@@ -190,7 +226,8 @@ async function generateAiReply(conversationId: string): Promise<string | null> {
     .select("sender_type, content")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
-    .limit(20);
+    .limit(40);
+
 
   const messages = [
     ...(history ?? []).map((m) => ({

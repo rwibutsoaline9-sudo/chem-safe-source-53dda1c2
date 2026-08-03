@@ -78,33 +78,35 @@ type SceneType =
   | "lab"
   | "plant";
 
-// LoremFlickr tag sets tuned per scene. Multiple tags narrow the photo topic.
-const sceneTags: Record<SceneType, string> = {
-  toxic: "chemical,hazard,warning,barrel",
-  aromatic: "chemistry,reactor,industrial",
-  alkali: "flakes,white,chemical,powder",
-  fertilizer: "fertilizer,sack,agriculture",
-  acid: "chemical,tank,industrial,liquid",
-  amine: "industrial,tank,pipeline",
-  corrosive: "drum,chemical,warning",
-  peroxide: "bottle,chemical,laboratory",
-  salts: "salt,crystal,mineral,white",
-  carbonate: "powder,sack,mineral",
-  metal: "crystal,mineral,copper,blue",
-  oxide: "powder,pigment,white,industrial",
-  boron: "mineral,crystal,box",
-  preservative: "bottle,pharmaceutical,laboratory",
-  "organic-acid": "crystal,white,chemistry",
-  solvent: "drum,barrel,industrial",
-  alcohol: "bottle,glass,liquid,laboratory",
-  glycol: "liquid,industrial,tank",
-  gas: "gas,cylinder,industrial",
-  surfactant: "foam,soap,detergent,bubble",
-  polymer: "pellets,plastic,granules,industrial",
-  resin: "resin,epoxy,pail,industrial",
-  lab: "laboratory,flask,chemistry,glassware",
-  plant: "factory,industrial,plant,refinery",
+// Curated local photo sets per scene. Several candidates per scene so similar
+// chemicals still get visually distinct cards.
+const scenePhotos: Record<SceneType, string[]> = {
+  toxic: [sceneHazard, sceneDrums],
+  aromatic: [scenePlant, sceneDrums],
+  alkali: [scenePowder, sceneCrystals],
+  fertilizer: [sceneSacks, scenePowder],
+  acid: [sceneAcid, sceneTotes],
+  amine: [sceneTotes, scenePlant],
+  corrosive: [sceneHazard, sceneTotes],
+  peroxide: [sceneAcid, sceneLab],
+  salts: [sceneCrystals, scenePowder],
+  carbonate: [scenePowder, sceneSacks],
+  metal: [scenePigment, sceneCrystals],
+  oxide: [scenePigment, scenePowder],
+  boron: [sceneCrystals, sceneSacks],
+  preservative: [sceneLab, sceneAcid],
+  "organic-acid": [sceneCrystals, sceneLab],
+  solvent: [sceneDrums, sceneTotes],
+  alcohol: [sceneAcid, sceneDrums],
+  glycol: [sceneTotes, sceneDrums],
+  gas: [sceneGas, scenePlant],
+  surfactant: [sceneTotes, scenePowder],
+  polymer: [scenePellets, sceneSacks],
+  resin: [scenePellets, sceneDrums],
+  lab: [sceneLab, sceneAcid],
+  plant: [scenePlant, sceneGas],
 };
+
 
 function hashString(value: string): number {
   let hash = 2166136261;

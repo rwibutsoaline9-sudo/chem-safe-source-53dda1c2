@@ -102,7 +102,7 @@ const Products = () => {
                 placeholder="Search by name, CAS number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-blue-950/20 backdrop-blur-sm border-blue-500/20 hover:border-blue-500/30 focus:border-blue-400/50 transition-all text-blue-100 placeholder:text-blue-400/50 text-sm"
+                className="pl-10 bg-background border-border hover:border-primary/40 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground text-sm"
               />
             </div>
 

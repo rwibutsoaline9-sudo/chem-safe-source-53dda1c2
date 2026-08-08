@@ -144,7 +144,7 @@ const Products = () => {
             </div>
           ) : (
             <>
-              <p className="text-xs sm:text-sm text-blue-300 mb-4 sm:mb-6 backdrop-blur-sm bg-blue-950/30 inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-blue-500/20">
+              <p className="text-xs sm:text-sm text-foreground mb-4 sm:mb-6 bg-background inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-border shadow-sm">
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 relative bg-gradient-to-b from-transparent via-blue-950/10 to-transparent py-4 sm:py-6 md:py-8 rounded-2xl">

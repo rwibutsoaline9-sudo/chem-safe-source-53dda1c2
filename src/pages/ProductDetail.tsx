@@ -54,6 +54,7 @@ const ProductDetail = () => {
       }
 
       setProduct(data as Product | null);
+      setActiveImage(0);
       setLoading(false);
     };
 

@@ -27,12 +27,14 @@ interface Product {
   price_currency: string;
   is_restricted: boolean;
   image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {

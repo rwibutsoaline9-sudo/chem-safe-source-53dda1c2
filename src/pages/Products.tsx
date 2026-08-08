@@ -85,10 +85,11 @@ const Products = () => {
       </div>
       <section className="relative bg-gradient-to-r from-blue-50/80 via-white/50 to-blue-50/80 py-6 sm:py-8 flex items-center backdrop-blur-sm border-b border-blue-200/30">
         <div className="container mx-auto px-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 text-blue-100">Industrial Chemicals Catalog</h1>
-          <p className="text-xs sm:text-sm text-blue-400/80">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 text-foreground">Industrial Chemicals Catalog</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Browse our comprehensive selection of high-quality chemicals
           </p>
+
         </div>
       </section>
 
@@ -101,7 +102,7 @@ const Products = () => {
                 placeholder="Search by name, CAS number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-blue-950/20 backdrop-blur-sm border-blue-500/20 hover:border-blue-500/30 focus:border-blue-400/50 transition-all text-blue-100 placeholder:text-blue-400/50 text-sm"
+                className="pl-10 bg-background border-border hover:border-primary/40 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground text-sm"
               />
             </div>
 
@@ -143,7 +144,7 @@ const Products = () => {
             </div>
           ) : (
             <>
-              <p className="text-xs sm:text-sm text-blue-300 mb-4 sm:mb-6 backdrop-blur-sm bg-blue-950/30 inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-blue-500/20">
+              <p className="text-xs sm:text-sm text-foreground mb-4 sm:mb-6 bg-background inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-border shadow-sm">
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 relative bg-gradient-to-b from-transparent via-blue-950/10 to-transparent py-4 sm:py-6 md:py-8 rounded-2xl">

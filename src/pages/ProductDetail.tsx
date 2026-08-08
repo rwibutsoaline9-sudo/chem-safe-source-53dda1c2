@@ -162,14 +162,40 @@ const ProductDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <div className="aspect-square overflow-hidden rounded-lg bg-muted mb-6">
-                <img 
-                  src={imageSrc} 
-                  alt={product.name}
+              <div className="aspect-square overflow-hidden rounded-lg bg-muted mb-3 border border-border">
+                <img
+                  src={imageSrc}
+                  alt={`${product.name} — photo ${activeImage + 1} of ${gallery.length}`}
                   style={getProductImageStyle(product.name, product.image_url)}
                   className="w-full h-full object-cover"
                 />
               </div>
+
+              {gallery.length > 1 && (
+                <div className="grid grid-cols-5 gap-2 mb-6">
+                  {gallery.map((url, index) => (
+                    <button
+                      key={`${url}-${index}`}
+                      type="button"
+                      onClick={() => setActiveImage(index)}
+                      aria-label={`View photo ${index + 1} of ${product.name}`}
+                      className={`aspect-square overflow-hidden rounded-md border-2 transition-all ${
+                        index === activeImage
+                          ? "border-primary ring-2 ring-primary/25"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`${product.name} thumbnail ${index + 1}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               
               {product.is_restricted && (
                 <Card className="border-destructive/50 bg-destructive/5">

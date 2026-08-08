@@ -28,6 +28,7 @@ interface Product {
   price_currency: string;
   is_restricted: boolean;
   image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 const Products = () => {

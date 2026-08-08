@@ -214,7 +214,14 @@ const Products = () => {
       price_currency: product.price_currency,
       is_restricted: product.is_restricted,
     });
-    setImageUrls(product.image_url ? [product.image_url] : []);
+    const gallery = (product.image_urls ?? []).filter(Boolean);
+    setImageUrls(
+      gallery.length > 0
+        ? gallery
+        : product.image_url
+          ? [product.image_url]
+          : [],
+    );
     setDialogOpen(true);
   };
 

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, ArrowUpRight } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Images } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getProductImage, getProductImageStyle } from "@/lib/productImages";
 import { toSlug } from "@/lib/slug";
@@ -18,6 +18,7 @@ interface Product {
   price_currency: string;
   is_restricted: boolean;
   image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 interface ProductCardProps {
@@ -25,7 +26,14 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const imageSrc = getProductImage(product.image_url, product.category, product.name);
+  const gallery = Array.from(
+    new Set(
+      [...(product.image_urls ?? []), product.image_url].filter(
+        (u): u is string => !!u && u.startsWith("http"),
+      ),
+    ),
+  );
+  const imageSrc = gallery[0] ?? getProductImage(product.image_url, product.category, product.name);
   const productSlug = toSlug(product.name);
 
   return (
@@ -58,6 +66,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               <AlertTriangle className="h-3 w-3" />
               <span className="hidden sm:inline">Restricted</span>
             </Badge>
+          )}
+
+          {gallery.length > 1 && (
+            <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm sm:text-xs">
+              <Images className="h-3 w-3" />
+              {gallery.length} photos
+            </span>
           )}
         </div>
 

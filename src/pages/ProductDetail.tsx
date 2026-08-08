@@ -27,12 +27,14 @@ interface Product {
   price_currency: string;
   is_restricted: boolean;
   image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,6 +54,7 @@ const ProductDetail = () => {
       }
 
       setProduct(data as Product | null);
+      setActiveImage(0);
       setLoading(false);
     };
 
@@ -70,7 +73,12 @@ const ProductDetail = () => {
       description: product.description ?? `${product.name} — industrial chemical supplied by ChemSupply Pro.`,
       category: product.category,
       sku: product.cas_number ?? product.id,
-      image: product.image_url ?? undefined,
+      image: (() => {
+        const imgs = [...(product.image_urls ?? []), product.image_url].filter(
+          (u): u is string => !!u && u.startsWith("http"),
+        );
+        return imgs.length > 0 ? Array.from(new Set(imgs)) : undefined;
+      })(),
       brand: { "@type": "Brand", name: "ChemSupply Pro" },
       offers: {
         "@type": "Offer",
@@ -110,7 +118,17 @@ const ProductDetail = () => {
     );
   }
 
-  const imageSrc = getProductImage(product.image_url, product.category, product.name);
+  const uploadedGallery = Array.from(
+    new Set(
+      [...(product.image_urls ?? []), product.image_url]
+        .filter((u): u is string => !!u && u.startsWith("http")),
+    ),
+  );
+  const gallery =
+    uploadedGallery.length > 0
+      ? uploadedGallery
+      : [getProductImage(product.image_url, product.category, product.name)];
+  const imageSrc = gallery[Math.min(activeImage, gallery.length - 1)];
 
   const handleDownloadSDS = () => {
     toast.info("SDS download will be available upon quote request verification");
@@ -149,14 +167,40 @@ const ProductDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <div className="aspect-square overflow-hidden rounded-lg bg-muted mb-6">
-                <img 
-                  src={imageSrc} 
-                  alt={product.name}
+              <div className="aspect-square overflow-hidden rounded-lg bg-muted mb-3 border border-border">
+                <img
+                  src={imageSrc}
+                  alt={`${product.name} — photo ${activeImage + 1} of ${gallery.length}`}
                   style={getProductImageStyle(product.name, product.image_url)}
                   className="w-full h-full object-cover"
                 />
               </div>
+
+              {gallery.length > 1 && (
+                <div className="grid grid-cols-5 gap-2 mb-6">
+                  {gallery.map((url, index) => (
+                    <button
+                      key={`${url}-${index}`}
+                      type="button"
+                      onClick={() => setActiveImage(index)}
+                      aria-label={`View photo ${index + 1} of ${product.name}`}
+                      className={`aspect-square overflow-hidden rounded-md border-2 transition-all ${
+                        index === activeImage
+                          ? "border-primary ring-2 ring-primary/25"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`${product.name} thumbnail ${index + 1}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               
               {product.is_restricted && (
                 <Card className="border-destructive/50 bg-destructive/5">

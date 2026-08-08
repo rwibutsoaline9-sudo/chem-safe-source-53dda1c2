@@ -28,6 +28,7 @@ interface Product {
   price_currency: string;
   is_restricted: boolean;
   image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 const Products = () => {
@@ -104,6 +105,16 @@ const Products = () => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const makeMainImage = (index: number) => {
+    setImageUrls((prev) => {
+      if (index === 0 || index >= prev.length) return prev;
+      const next = [...prev];
+      const [picked] = next.splice(index, 1);
+      return [picked, ...next];
+    });
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -145,7 +156,9 @@ const Products = () => {
       ...formData,
       price_value: parseFloat(formData.price_value),
       image_url,
+      image_urls: imageUrls,
     };
+
 
 
     if (editingProduct) {
@@ -201,7 +214,14 @@ const Products = () => {
       price_currency: product.price_currency,
       is_restricted: product.is_restricted,
     });
-    setImageUrls(product.image_url ? [product.image_url] : []);
+    const gallery = (product.image_urls ?? []).filter(Boolean);
+    setImageUrls(
+      gallery.length > 0
+        ? gallery
+        : product.image_url
+          ? [product.image_url]
+          : [],
+    );
     setDialogOpen(true);
   };
 
@@ -352,30 +372,45 @@ const Products = () => {
                   </Button>
 
                   {imageUrls.length > 0 && (
-                    <div className="grid grid-cols-3 gap-3 mt-3">
-                      {imageUrls.map((url, index) => (
-                        <div key={index} className="relative group rounded-lg overflow-hidden border">
-                          <img
-                            src={url}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-24 object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                          {index === 0 && (
-                            <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">
-                              Main
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {imageUrls.length} image(s) in this product's gallery. The first one is the
+                        main photo shown on cards and search results.
+                      </p>
+                      <div className="grid grid-cols-3 gap-3 mt-2">
+                        {imageUrls.map((url, index) => (
+                          <div key={`${url}-${index}`} className="relative group rounded-lg overflow-hidden border">
+                            <img
+                              src={url}
+                              alt={`Product ${index + 1}`}
+                              className="w-full h-24 object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            {index === 0 ? (
+                              <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">
+                                Main
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => makeMainImage(index)}
+                                className="absolute bottom-1 left-1 bg-background/90 text-foreground border border-border text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                Make main
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
+
                 </div>
 
                 <div className="space-y-2">

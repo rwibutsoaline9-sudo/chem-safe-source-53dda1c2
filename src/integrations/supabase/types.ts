@@ -408,6 +408,7 @@ export type Database = {
           grade: string | null
           id: string
           image_url: string | null
+          image_urls: string[]
           is_restricted: boolean | null
           name: string
           packaging: string[] | null
@@ -427,6 +428,7 @@ export type Database = {
           grade?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_restricted?: boolean | null
           name: string
           packaging?: string[] | null
@@ -446,6 +448,7 @@ export type Database = {
           grade?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_restricted?: boolean | null
           name?: string
           packaging?: string[] | null

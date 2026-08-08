@@ -33,20 +33,28 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
   const [compareOpen, setCompareOpen] = useState(false);
   const [slider, setSlider] = useState(50);
 
-  if (!product) return null;
-
   const resolveSrc = (url: string | null | undefined) =>
-    url
-      ? url.startsWith("http")
-        ? url
-        : getProductImage(url, product.category, product.name)
-      : getProductImage(null, product.category, product.name);
+    product
+      ? url
+        ? url.startsWith("http")
+          ? url
+          : getProductImage(url, product.category, product.name)
+        : getProductImage(null, product.category, product.name)
+      : "";
 
-  const originalUrl = product.image_url;
+  const originalUrl = product?.image_url ?? null;
   const originalSrc = resolveSrc(originalUrl);
   const currentUrl = pendingUrl !== undefined ? pendingUrl : originalUrl;
   const previewSrc = resolveSrc(currentUrl);
   const hasChange = pendingUrl !== undefined && pendingUrl !== originalUrl;
+
+  // Reset load state when the source changes.
+  useEffect(() => {
+    setPreviewLoading(true);
+    setPreviewError(false);
+  }, [previewSrc]);
+
+  if (!product) return null;
 
   const confirmDiscard = (message = "You have an unsaved image change. Discard it?") =>
     !hasChange || window.confirm(message);
@@ -65,11 +73,6 @@ export const QuickImageEditor = ({ open, onOpenChange, product, onSaved }: Props
     setPendingUrl(url);
   };
 
-  // Reset load state when the source changes.
-  useEffect(() => {
-    setPreviewLoading(true);
-    setPreviewError(false);
-  }, [previewSrc]);
 
   const handleUpload = async (files: FileList) => {
     const file = files[0];

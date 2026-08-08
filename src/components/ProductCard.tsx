@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, ArrowUpRight } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Images } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getProductImage, getProductImageStyle } from "@/lib/productImages";
 import { toSlug } from "@/lib/slug";

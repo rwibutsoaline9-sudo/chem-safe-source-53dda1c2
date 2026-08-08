@@ -156,7 +156,9 @@ const Products = () => {
       ...formData,
       price_value: parseFloat(formData.price_value),
       image_url,
+      image_urls: imageUrls,
     };
+
 
 
     if (editingProduct) {

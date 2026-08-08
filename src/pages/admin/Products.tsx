@@ -372,30 +372,45 @@ const Products = () => {
                   </Button>
 
                   {imageUrls.length > 0 && (
-                    <div className="grid grid-cols-3 gap-3 mt-3">
-                      {imageUrls.map((url, index) => (
-                        <div key={index} className="relative group rounded-lg overflow-hidden border">
-                          <img
-                            src={url}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-24 object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                          {index === 0 && (
-                            <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">
-                              Main
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {imageUrls.length} image(s) in this product's gallery. The first one is the
+                        main photo shown on cards and search results.
+                      </p>
+                      <div className="grid grid-cols-3 gap-3 mt-2">
+                        {imageUrls.map((url, index) => (
+                          <div key={`${url}-${index}`} className="relative group rounded-lg overflow-hidden border">
+                            <img
+                              src={url}
+                              alt={`Product ${index + 1}`}
+                              className="w-full h-24 object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            {index === 0 ? (
+                              <span className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded">
+                                Main
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => makeMainImage(index)}
+                                className="absolute bottom-1 left-1 bg-background/90 text-foreground border border-border text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                Make main
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
+
                 </div>
 
                 <div className="space-y-2">

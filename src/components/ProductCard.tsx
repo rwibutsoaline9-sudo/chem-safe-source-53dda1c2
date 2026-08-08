@@ -26,7 +26,14 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const imageSrc = getProductImage(product.image_url, product.category, product.name);
+  const gallery = Array.from(
+    new Set(
+      [...(product.image_urls ?? []), product.image_url].filter(
+        (u): u is string => !!u && u.startsWith("http"),
+      ),
+    ),
+  );
+  const imageSrc = gallery[0] ?? getProductImage(product.image_url, product.category, product.name);
   const productSlug = toSlug(product.name);
 
   return (

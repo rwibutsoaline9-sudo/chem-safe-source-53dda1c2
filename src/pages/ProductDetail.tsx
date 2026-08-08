@@ -73,7 +73,12 @@ const ProductDetail = () => {
       description: product.description ?? `${product.name} — industrial chemical supplied by ChemSupply Pro.`,
       category: product.category,
       sku: product.cas_number ?? product.id,
-      image: product.image_url ?? undefined,
+      image: (() => {
+        const imgs = [...(product.image_urls ?? []), product.image_url].filter(
+          (u): u is string => !!u && u.startsWith("http"),
+        );
+        return imgs.length > 0 ? Array.from(new Set(imgs)) : undefined;
+      })(),
       brand: { "@type": "Brand", name: "ChemSupply Pro" },
       offers: {
         "@type": "Offer",

@@ -113,7 +113,17 @@ const ProductDetail = () => {
     );
   }
 
-  const imageSrc = getProductImage(product.image_url, product.category, product.name);
+  const uploadedGallery = Array.from(
+    new Set(
+      [...(product.image_urls ?? []), product.image_url]
+        .filter((u): u is string => !!u && u.startsWith("http")),
+    ),
+  );
+  const gallery =
+    uploadedGallery.length > 0
+      ? uploadedGallery
+      : [getProductImage(product.image_url, product.category, product.name)];
+  const imageSrc = gallery[Math.min(activeImage, gallery.length - 1)];
 
   const handleDownloadSDS = () => {
     toast.info("SDS download will be available upon quote request verification");

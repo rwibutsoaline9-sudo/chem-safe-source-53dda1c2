@@ -44,10 +44,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
           <Badge
             variant="secondary"
-            className="absolute left-2 top-2 max-w-[85%] truncate bg-background/85 text-[10px] font-medium backdrop-blur-sm sm:text-xs"
+            className="absolute left-2 top-2 max-w-[85%] truncate border border-border bg-background text-[10px] font-semibold text-foreground shadow-sm sm:text-xs"
           >
             {product.category}
           </Badge>
+
 
           {product.is_restricted && (
             <Badge

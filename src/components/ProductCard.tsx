@@ -67,6 +67,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               <span className="hidden sm:inline">Restricted</span>
             </Badge>
           )}
+
+          {gallery.length > 1 && (
+            <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm sm:text-xs">
+              <Images className="h-3 w-3" />
+              {gallery.length} photos
+            </span>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">

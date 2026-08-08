@@ -85,10 +85,11 @@ const Products = () => {
       </div>
       <section className="relative bg-gradient-to-r from-blue-50/80 via-white/50 to-blue-50/80 py-6 sm:py-8 flex items-center backdrop-blur-sm border-b border-blue-200/30">
         <div className="container mx-auto px-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 text-blue-100">Industrial Chemicals Catalog</h1>
-          <p className="text-xs sm:text-sm text-blue-400/80">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 text-foreground">Industrial Chemicals Catalog</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Browse our comprehensive selection of high-quality chemicals
           </p>
+
         </div>
       </section>
 

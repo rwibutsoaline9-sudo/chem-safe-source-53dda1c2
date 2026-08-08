@@ -105,6 +105,16 @@ const Products = () => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const makeMainImage = (index: number) => {
+    setImageUrls((prev) => {
+      if (index === 0 || index >= prev.length) return prev;
+      const next = [...prev];
+      const [picked] = next.splice(index, 1);
+      return [picked, ...next];
+    });
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

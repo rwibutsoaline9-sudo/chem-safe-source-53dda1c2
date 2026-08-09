@@ -12,6 +12,8 @@ import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, Folde
 import { Switch } from '@/components/ui/switch';
 import { ImageLibraryPicker } from '@/components/admin/ImageLibraryPicker';
 import { QuickImageEditor } from '@/components/admin/QuickImageEditor';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
 
 const SUPABASE_URL = "https://lriwodanoclewwjrsimi.supabase.co";
 
@@ -537,12 +539,18 @@ const Products = () => {
         onSelect={(url) => setImageUrls((prev) => [url, ...prev.filter((u) => u !== url)])}
       />
 
-      <QuickImageEditor
-        open={!!quickEditProduct}
-        onOpenChange={(o) => !o && setQuickEditProduct(null)}
-        product={quickEditProduct}
-        onSaved={fetchProducts}
-      />
+      <ErrorBoundary
+        label="The image editor hit an unexpected error"
+        onReset={() => setQuickEditProduct(null)}
+      >
+        <QuickImageEditor
+          open={!!quickEditProduct}
+          onOpenChange={(o) => !o && setQuickEditProduct(null)}
+          product={quickEditProduct}
+          onSaved={fetchProducts}
+        />
+      </ErrorBoundary>
+
     </AdminLayout>
   );
 };

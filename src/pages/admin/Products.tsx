@@ -33,6 +33,16 @@ interface Product {
   image_urls?: string[] | null;
 }
 
+interface UploadItem {
+  name: string;
+  size: number;
+  progress: number;
+  status: 'uploading' | 'done' | 'error';
+  url?: string;
+  error?: string;
+}
+
+
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);

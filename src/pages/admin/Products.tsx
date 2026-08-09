@@ -423,7 +423,9 @@ const Products = () => {
                     {uploading ? (
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Uploading...</span>
+                        <span>
+                          Uploading {uploads.filter((u) => u.status === 'uploading').length} file(s)...
+                        </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -433,6 +435,61 @@ const Products = () => {
                       </div>
                     )}
                   </div>
+
+                  {uploads.length > 0 && (
+                    <div className="rounded-lg border divide-y mt-2">
+                      <div className="flex items-center justify-between px-3 py-2 text-xs">
+                        <span className="font-medium">
+                          {uploads.filter((u) => u.status === 'done').length} done ·{' '}
+                          {uploads.filter((u) => u.status === 'uploading').length} uploading ·{' '}
+                          {uploads.filter((u) => u.status === 'error').length} failed
+                        </span>
+                        {!uploading && (
+                          <button
+                            type="button"
+                            onClick={clearFinishedUploads}
+                            className="text-muted-foreground hover:text-foreground underline"
+                          >
+                            Clear list
+                          </button>
+                        )}
+                      </div>
+                      {uploads.map((u, i) => (
+                        <div key={`${u.name}-${i}`} className="px-3 py-2 space-y-1.5">
+                          <div className="flex items-center gap-2 text-xs">
+                            {u.status === 'uploading' && (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground shrink-0" />
+                            )}
+                            {u.status === 'done' && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                            {u.status === 'error' && (
+                              <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                            )}
+                            <span className="truncate flex-1" title={u.name}>
+                              {u.name}
+                            </span>
+                            <span className="text-muted-foreground shrink-0">
+                              {(u.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                            <span
+                              className={`shrink-0 font-medium ${
+                                u.status === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                              }`}
+                            >
+                              {u.status === 'error' ? 'Failed' : `${u.progress}%`}
+                            </span>
+                          </div>
+                          <Progress
+                            value={u.progress}
+                            className={u.status === 'error' ? 'h-1.5 opacity-50' : 'h-1.5'}
+                          />
+                          {u.status === 'error' && u.error && (
+                            <p className="text-[11px] text-destructive">{u.error}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
 
                   <Button
                     type="button"

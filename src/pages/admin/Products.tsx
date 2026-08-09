@@ -77,31 +77,90 @@ const Products = () => {
     setLoading(false);
   };
 
+  const uploadWithProgress = (file: File, filePath: string, token: string, onProgress: (pct: number) => void) =>
+    new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/product-images/${filePath}`);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.setRequestHeader('x-upsert', 'true');
+      if (file.type) xhr.setRequestHeader('Content-Type', file.type);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          onProgress(100);
+          resolve(`${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`);
+        } else {
+          let msg = `Upload failed (${xhr.status})`;
+          try {
+            const parsed = JSON.parse(xhr.responseText);
+            if (parsed?.message) msg = parsed.message;
+          } catch {
+            /* keep default message */
+          }
+          reject(new Error(msg));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.onabort = () => reject(new Error('Upload cancelled'));
+      xhr.send(file);
+    });
+
   const handleUploadImages = async (files: FileList) => {
+    const list = Array.from(files);
+    if (list.length === 0) return;
+
+    const startIndex = uploads.length;
+    setUploads((prev) => [
+      ...prev,
+      ...list.map((f) => ({ name: f.name, size: f.size, progress: 0, status: 'uploading' as const })),
+    ]);
     setUploading(true);
-    const uploaded: string[] = [];
 
-    for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
-      const filePath = `products/${fileName}`;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token ?? '';
 
-      const { error } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, { upsert: true });
+    const setItem = (i: number, patch: Partial<UploadItem>) =>
+      setUploads((prev) => prev.map((u, idx) => (idx === i ? { ...u, ...patch } : u)));
 
-      if (error) {
-        toast.error(`Failed to upload ${file.name}`);
-      } else {
-        const url = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
-        uploaded.push(url);
-      }
+    const results = await Promise.all(
+      list.map(async (file, i) => {
+        const slot = startIndex + i;
+        const ext = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+        const filePath = `products/${fileName}`;
+        try {
+          const url = await uploadWithProgress(file, filePath, token, (pct) =>
+            setItem(slot, { progress: pct }),
+          );
+          setItem(slot, { progress: 100, status: 'done', url });
+          return url;
+        } catch (err) {
+          setItem(slot, {
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Upload failed',
+          });
+          return null;
+        }
+      }),
+    );
+
+    const uploaded = results.filter((u): u is string => Boolean(u));
+    const failed = results.length - uploaded.length;
+
+    if (uploaded.length > 0) {
+      setImageUrls((prev) => [...prev, ...uploaded]);
+      toast.success(`${uploaded.length} image(s) uploaded`);
     }
-
-    setImageUrls((prev) => [...prev, ...uploaded]);
-    if (uploaded.length > 0) toast.success(`${uploaded.length} image(s) uploaded`);
+    if (failed > 0) toast.error(`${failed} image(s) failed to upload`);
     setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const clearFinishedUploads = () =>
+    setUploads((prev) => prev.filter((u) => u.status === 'uploading'));
+
 
   const removeImage = (index: number) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));

@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, FolderOpen, Camera } from 'lucide-react';
+import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, FolderOpen, Camera, Check, AlertCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+
 import { Switch } from '@/components/ui/switch';
 import { ImageLibraryPicker } from '@/components/admin/ImageLibraryPicker';
 import { QuickImageEditor } from '@/components/admin/QuickImageEditor';
@@ -33,6 +35,16 @@ interface Product {
   image_urls?: string[] | null;
 }
 
+interface UploadItem {
+  name: string;
+  size: number;
+  progress: number;
+  status: 'uploading' | 'done' | 'error';
+  url?: string;
+  error?: string;
+}
+
+
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +52,9 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [quickEditProduct, setQuickEditProduct] = useState<Product | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,31 +91,90 @@ const Products = () => {
     setLoading(false);
   };
 
+  const uploadWithProgress = (file: File, filePath: string, token: string, onProgress: (pct: number) => void) =>
+    new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/product-images/${filePath}`);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.setRequestHeader('x-upsert', 'true');
+      if (file.type) xhr.setRequestHeader('Content-Type', file.type);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          onProgress(100);
+          resolve(`${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`);
+        } else {
+          let msg = `Upload failed (${xhr.status})`;
+          try {
+            const parsed = JSON.parse(xhr.responseText);
+            if (parsed?.message) msg = parsed.message;
+          } catch {
+            /* keep default message */
+          }
+          reject(new Error(msg));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.onabort = () => reject(new Error('Upload cancelled'));
+      xhr.send(file);
+    });
+
   const handleUploadImages = async (files: FileList) => {
+    const list = Array.from(files);
+    if (list.length === 0) return;
+
+    const startIndex = uploads.length;
+    setUploads((prev) => [
+      ...prev,
+      ...list.map((f) => ({ name: f.name, size: f.size, progress: 0, status: 'uploading' as const })),
+    ]);
     setUploading(true);
-    const uploaded: string[] = [];
 
-    for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
-      const filePath = `products/${fileName}`;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token ?? '';
 
-      const { error } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, { upsert: true });
+    const setItem = (i: number, patch: Partial<UploadItem>) =>
+      setUploads((prev) => prev.map((u, idx) => (idx === i ? { ...u, ...patch } : u)));
 
-      if (error) {
-        toast.error(`Failed to upload ${file.name}`);
-      } else {
-        const url = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
-        uploaded.push(url);
-      }
+    const results = await Promise.all(
+      list.map(async (file, i) => {
+        const slot = startIndex + i;
+        const ext = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+        const filePath = `products/${fileName}`;
+        try {
+          const url = await uploadWithProgress(file, filePath, token, (pct) =>
+            setItem(slot, { progress: pct }),
+          );
+          setItem(slot, { progress: 100, status: 'done', url });
+          return url;
+        } catch (err) {
+          setItem(slot, {
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Upload failed',
+          });
+          return null;
+        }
+      }),
+    );
+
+    const uploaded = results.filter((u): u is string => Boolean(u));
+    const failed = results.length - uploaded.length;
+
+    if (uploaded.length > 0) {
+      setImageUrls((prev) => [...prev, ...uploaded]);
+      toast.success(`${uploaded.length} image(s) uploaded`);
     }
-
-    setImageUrls((prev) => [...prev, ...uploaded]);
-    if (uploaded.length > 0) toast.success(`${uploaded.length} image(s) uploaded`);
+    if (failed > 0) toast.error(`${failed} image(s) failed to upload`);
     setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const clearFinishedUploads = () =>
+    setUploads((prev) => prev.filter((u) => u.status === 'uploading'));
+
 
   const removeImage = (index: number) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== index));
@@ -352,7 +425,9 @@ const Products = () => {
                     {uploading ? (
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Uploading...</span>
+                        <span>
+                          Uploading {uploads.filter((u) => u.status === 'uploading').length} file(s)...
+                        </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -362,6 +437,61 @@ const Products = () => {
                       </div>
                     )}
                   </div>
+
+                  {uploads.length > 0 && (
+                    <div className="rounded-lg border divide-y mt-2">
+                      <div className="flex items-center justify-between px-3 py-2 text-xs">
+                        <span className="font-medium">
+                          {uploads.filter((u) => u.status === 'done').length} done ·{' '}
+                          {uploads.filter((u) => u.status === 'uploading').length} uploading ·{' '}
+                          {uploads.filter((u) => u.status === 'error').length} failed
+                        </span>
+                        {!uploading && (
+                          <button
+                            type="button"
+                            onClick={clearFinishedUploads}
+                            className="text-muted-foreground hover:text-foreground underline"
+                          >
+                            Clear list
+                          </button>
+                        )}
+                      </div>
+                      {uploads.map((u, i) => (
+                        <div key={`${u.name}-${i}`} className="px-3 py-2 space-y-1.5">
+                          <div className="flex items-center gap-2 text-xs">
+                            {u.status === 'uploading' && (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground shrink-0" />
+                            )}
+                            {u.status === 'done' && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                            {u.status === 'error' && (
+                              <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                            )}
+                            <span className="truncate flex-1" title={u.name}>
+                              {u.name}
+                            </span>
+                            <span className="text-muted-foreground shrink-0">
+                              {(u.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                            <span
+                              className={`shrink-0 font-medium ${
+                                u.status === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                              }`}
+                            >
+                              {u.status === 'error' ? 'Failed' : `${u.progress}%`}
+                            </span>
+                          </div>
+                          <Progress
+                            value={u.progress}
+                            className={u.status === 'error' ? 'h-1.5 opacity-50' : 'h-1.5'}
+                          />
+                          {u.status === 'error' && u.error && (
+                            <p className="text-[11px] text-destructive">{u.error}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
 
                   <Button
                     type="button"

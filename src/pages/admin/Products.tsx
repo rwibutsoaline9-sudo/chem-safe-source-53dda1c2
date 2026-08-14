@@ -368,6 +368,8 @@ const Products = () => {
     setDialogOpen(false);
     setEditingProduct(null);
     setImageUrls([]);
+    setOriginalImageUrls([]);
+    setUploads([]);
     setFormData({
       name: '',
       category: '',

@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, FolderOpen, Camera, Check, AlertCircle, GripVertical } from 'lucide-react';
+import { Plus, Pencil, Trash2, ShieldAlert, Upload, X, ImageIcon, Loader2, FolderOpen, Camera, Check, AlertCircle, GripVertical, Undo2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 import { Switch } from '@/components/ui/switch';
@@ -54,6 +54,7 @@ const Products = () => {
   const [uploading, setUploading] = useState(false);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -183,6 +184,7 @@ const Products = () => {
           toast.error('Uploaded images could not be saved to the product');
         } else {
           setEditingProduct({ ...editingProduct, image_url: nextImageUrl, image_urls: newImageUrls });
+          setOriginalImageUrls(newImageUrls);
           fetchProducts();
           toast.success('Product gallery refreshed');
         }
@@ -211,6 +213,17 @@ const Products = () => {
     setEditingProduct({ ...editingProduct, image_url: nextUrls[0] ?? null, image_urls: nextUrls });
     fetchProducts();
     toast.success('Image order saved');
+  };
+
+  const orderChanged = (a: string[], b: string[]) =>
+    a.length !== b.length || a.some((url, i) => url !== b[i]);
+
+  const undoOrderChanges = () => {
+    setImageUrls([...originalImageUrls]);
+    if (editingProduct) {
+      persistImageOrder([...originalImageUrls]);
+    }
+    toast.info('Image order reverted');
   };
 
   const removeImage = (index: number) => {
@@ -340,13 +353,14 @@ const Products = () => {
       is_restricted: product.is_restricted,
     });
     const gallery = (product.image_urls ?? []).filter(Boolean);
-    setImageUrls(
+    const initialGallery =
       gallery.length > 0
         ? gallery
         : product.image_url
           ? [product.image_url]
-          : [],
-    );
+          : [];
+    setImageUrls(initialGallery);
+    setOriginalImageUrls(initialGallery);
     setDialogOpen(true);
   };
 
@@ -354,6 +368,8 @@ const Products = () => {
     setDialogOpen(false);
     setEditingProduct(null);
     setImageUrls([]);
+    setOriginalImageUrls([]);
+    setUploads([]);
     setFormData({
       name: '',
       category: '',
@@ -555,10 +571,22 @@ const Products = () => {
 
                   {imageUrls.length > 0 && (
                     <>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
-                        reorder — the first one is the main photo shown on cards and search results.
-                      </p>
+                      <div className="flex items-center justify-between mt-3">
+                        <p className="text-xs text-muted-foreground">
+                          {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
+                          reorder — the first one is the main photo shown on cards and search results.
+                        </p>
+                        {orderChanged(imageUrls, originalImageUrls) && (
+                          <button
+                            type="button"
+                            onClick={undoOrderChanges}
+                            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
+                          >
+                            <Undo2 className="h-3 w-3" />
+                            Undo order changes
+                          </button>
+                        )}
+                      </div>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         {imageUrls.map((url, index) => (
                           <div

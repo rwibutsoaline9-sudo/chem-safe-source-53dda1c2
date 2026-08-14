@@ -196,29 +196,46 @@ const Products = () => {
   const clearFinishedUploads = () =>
     setUploads((prev) => prev.filter((u) => u.status === 'uploading'));
 
+  const persistImageOrder = async (nextUrls: string[]) => {
+    if (!editingProduct) return;
+    const { error } = await supabase
+      .from('products')
+      .update({ image_url: nextUrls[0] ?? null, image_urls: nextUrls })
+      .eq('id', editingProduct.id);
+
+    if (error) {
+      toast.error('Could not save image order');
+      return;
+    }
+
+    setEditingProduct({ ...editingProduct, image_url: nextUrls[0] ?? null, image_urls: nextUrls });
+    fetchProducts();
+    toast.success('Image order saved');
+  };
 
   const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+    const next = imageUrls.filter((_, i) => i !== index);
+    setImageUrls(next);
+    persistImageOrder(next);
   };
 
   const makeMainImage = (index: number) => {
-    setImageUrls((prev) => {
-      if (index === 0 || index >= prev.length) return prev;
-      const next = [...prev];
-      const [picked] = next.splice(index, 1);
-      return [picked, ...next];
-    });
+    if (index === 0 || index >= imageUrls.length) return;
+    const next = [...imageUrls];
+    const [picked] = next.splice(index, 1);
+    next.unshift(picked);
+    setImageUrls(next);
+    persistImageOrder(next);
   };
 
   const moveImage = (from: number | null, to: number) => {
     if (from === null || to < 0 || from === to) return;
-    setImageUrls((prev) => {
-      if (from >= prev.length || to >= prev.length) return prev;
-      const next = [...prev];
-      const [picked] = next.splice(from, 1);
-      next.splice(to, 0, picked);
-      return next;
-    });
+    if (from >= imageUrls.length || to >= imageUrls.length) return;
+    const next = [...imageUrls];
+    const [picked] = next.splice(from, 1);
+    next.splice(to, 0, picked);
+    setImageUrls(next);
+    persistImageOrder(next);
   };
 
 

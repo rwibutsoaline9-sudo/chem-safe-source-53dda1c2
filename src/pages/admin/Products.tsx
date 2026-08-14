@@ -164,8 +164,27 @@ const Products = () => {
     const failed = results.length - uploaded.length;
 
     if (uploaded.length > 0) {
-      setImageUrls((prev) => [...prev, ...uploaded]);
+      const newImageUrls = [...imageUrls, ...uploaded];
+      setImageUrls(newImageUrls);
       toast.success(`${uploaded.length} image(s) uploaded`);
+
+      // Auto-save the gallery for an existing product so the new images appear
+      // everywhere without requiring a manual "Update" click.
+      if (editingProduct) {
+        const nextImageUrl = newImageUrls[0];
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ image_url: nextImageUrl, image_urls: newImageUrls })
+          .eq('id', editingProduct.id);
+
+        if (updateError) {
+          toast.error('Uploaded images could not be saved to the product');
+        } else {
+          setEditingProduct({ ...editingProduct, image_url: nextImageUrl, image_urls: newImageUrls });
+          fetchProducts();
+          toast.success('Product gallery refreshed');
+        }
+      }
     }
     if (failed > 0) toast.error(`${failed} image(s) failed to upload`);
     setUploading(false);

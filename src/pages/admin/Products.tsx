@@ -54,6 +54,8 @@ const Products = () => {
   const [uploading, setUploading] = useState(false);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [quickEditProduct, setQuickEditProduct] = useState<Product | null>(null);

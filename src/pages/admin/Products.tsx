@@ -208,6 +208,18 @@ const Products = () => {
     });
   };
 
+  const moveImage = (from: number | null, to: number) => {
+    if (from === null || to < 0 || from === to) return;
+    setImageUrls((prev) => {
+      if (from >= prev.length || to >= prev.length) return prev;
+      const next = [...prev];
+      const [picked] = next.splice(from, 1);
+      next.splice(to, 0, picked);
+      return next;
+    });
+  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

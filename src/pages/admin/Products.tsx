@@ -571,10 +571,22 @@ const Products = () => {
 
                   {imageUrls.length > 0 && (
                     <>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
-                        reorder — the first one is the main photo shown on cards and search results.
-                      </p>
+                      <div className="flex items-center justify-between mt-3">
+                        <p className="text-xs text-muted-foreground">
+                          {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
+                          reorder — the first one is the main photo shown on cards and search results.
+                        </p>
+                        {orderChanged(imageUrls, originalImageUrls) && (
+                          <button
+                            type="button"
+                            onClick={undoOrderChanges}
+                            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
+                          >
+                            <Undo2 className="h-3 w-3" />
+                            Undo order changes
+                          </button>
+                        )}
+                      </div>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         {imageUrls.map((url, index) => (
                           <div

@@ -184,6 +184,7 @@ const Products = () => {
           toast.error('Uploaded images could not be saved to the product');
         } else {
           setEditingProduct({ ...editingProduct, image_url: nextImageUrl, image_urls: newImageUrls });
+          setOriginalImageUrls(newImageUrls);
           fetchProducts();
           toast.success('Product gallery refreshed');
         }

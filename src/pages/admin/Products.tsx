@@ -353,13 +353,14 @@ const Products = () => {
       is_restricted: product.is_restricted,
     });
     const gallery = (product.image_urls ?? []).filter(Boolean);
-    setImageUrls(
+    const initialGallery =
       gallery.length > 0
         ? gallery
         : product.image_url
           ? [product.image_url]
-          : [],
-    );
+          : [];
+    setImageUrls(initialGallery);
+    setOriginalImageUrls(initialGallery);
     setDialogOpen(true);
   };
 

@@ -525,17 +525,47 @@ const Products = () => {
                   {imageUrls.length > 0 && (
                     <>
                       <p className="text-xs text-muted-foreground mt-3">
-                        {imageUrls.length} image(s) in this product's gallery. The first one is the
-                        main photo shown on cards and search results.
+                        {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
+                        reorder — the first one is the main photo shown on cards and search results.
                       </p>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         {imageUrls.map((url, index) => (
-                          <div key={`${url}-${index}`} className="relative group rounded-lg overflow-hidden border">
+                          <div
+                            key={`${url}-${index}`}
+                            draggable
+                            onDragStart={(e) => {
+                              setDragIndex(index);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                              if (dragIndex !== null && dragIndex !== index) setDragOverIndex(index);
+                            }}
+                            onDragLeave={() => setDragOverIndex((cur) => (cur === index ? null : cur))}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              moveImage(dragIndex, index);
+                              setDragIndex(null);
+                              setDragOverIndex(null);
+                            }}
+                            onDragEnd={() => {
+                              setDragIndex(null);
+                              setDragOverIndex(null);
+                            }}
+                            className={`relative group rounded-lg overflow-hidden border cursor-move transition-all ${
+                              dragIndex === index ? 'opacity-40' : ''
+                            } ${dragOverIndex === index ? 'ring-2 ring-primary' : ''}`}
+                          >
                             <img
                               src={url}
                               alt={`Product ${index + 1}`}
-                              className="w-full h-24 object-cover"
+                              draggable={false}
+                              className="w-full h-24 object-cover pointer-events-none"
                             />
+                            <span className="absolute top-1 left-1 bg-background/90 border border-border rounded p-0.5 text-muted-foreground">
+                              <GripVertical className="h-3 w-3" />
+                            </span>
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
@@ -556,11 +586,32 @@ const Products = () => {
                                 Make main
                               </button>
                             )}
+                            <div className="absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                aria-label="Move image left"
+                                disabled={index === 0}
+                                onClick={() => moveImage(index, index - 1)}
+                                className="bg-background/90 border border-border rounded px-1 text-[10px] disabled:opacity-30"
+                              >
+                                ←
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Move image right"
+                                disabled={index === imageUrls.length - 1}
+                                onClick={() => moveImage(index, index + 1)}
+                                className="bg-background/90 border border-border rounded px-1 text-[10px] disabled:opacity-30"
+                              >
+                                →
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </>
                   )}
+
 
                 </div>
 

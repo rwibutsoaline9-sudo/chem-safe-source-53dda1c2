@@ -214,6 +214,17 @@ const Products = () => {
     toast.success('Image order saved');
   };
 
+  const orderChanged = (a: string[], b: string[]) =>
+    a.length !== b.length || a.some((url, i) => url !== b[i]);
+
+  const undoOrderChanges = () => {
+    setImageUrls([...originalImageUrls]);
+    if (editingProduct) {
+      persistImageOrder([...originalImageUrls]);
+    }
+    toast.info('Image order reverted');
+  };
+
   const removeImage = (index: number) => {
     const next = imageUrls.filter((_, i) => i !== index);
     setImageUrls(next);

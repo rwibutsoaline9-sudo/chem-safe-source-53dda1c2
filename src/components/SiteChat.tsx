@@ -182,6 +182,8 @@ export const SiteChat = () => {
         visitor_id: visitorId,
         conversation_id: convoId,
         content: text,
+        visitor_name: name || null,
+        page_path: typeof window !== "undefined" ? window.location.pathname : null,
       });
 
       if (!res?.message) {

@@ -376,6 +376,7 @@ const Products = () => {
           : [];
     setImageUrls(initialGallery);
     setOriginalImageUrls(initialGallery);
+    setOrderHistory([]);
     setDialogOpen(true);
   };
 
@@ -384,6 +385,7 @@ const Products = () => {
     setEditingProduct(null);
     setImageUrls([]);
     setOriginalImageUrls([]);
+    setOrderHistory([]);
     setUploads([]);
     setFormData({
       name: '',

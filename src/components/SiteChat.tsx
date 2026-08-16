@@ -375,7 +375,7 @@ export const SiteChat = () => {
                 className="min-h-[40px] max-h-32 resize-none text-sm"
                 disabled={sending}
               />
-              <Button onClick={handleSend} disabled={!input.trim() || sending} size="icon">
+              <Button onClick={() => handleSend()} disabled={!input.trim() || sending} size="icon">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>

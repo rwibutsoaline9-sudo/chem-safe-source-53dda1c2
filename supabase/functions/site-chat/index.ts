@@ -113,7 +113,7 @@ function isUuid(s: unknown): s is string {
 async function verifyOwnership(conversationId: string, visitorId: string) {
   const { data } = await supabase
     .from("chat_conversations")
-    .select("id, visitor_id, ai_enabled, status, unread_admin")
+    .select("id, visitor_id, ai_enabled, status, unread_admin, visitor_name")
     .eq("id", conversationId)
     .maybeSingle();
   if (!data || data.visitor_id !== visitorId) return null;
@@ -442,7 +442,10 @@ Deno.serve(async (req) => {
 
         let aiReply: string | null = null;
         if (owner.ai_enabled && owner.status === "open") {
-          aiReply = await generateAiReply(conversationId);
+          aiReply = await generateAiReply(conversationId, {
+            visitorName: owner.visitor_name ?? (typeof body.visitor_name === "string" ? body.visitor_name.slice(0, 100) : null),
+            pagePath: typeof body.page_path === "string" ? body.page_path.slice(0, 200) : null,
+          });
         }
 
         return json({ message: inserted, ai_reply: aiReply });

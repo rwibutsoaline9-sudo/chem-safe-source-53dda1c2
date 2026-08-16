@@ -230,9 +230,45 @@ const listRelatedProductsTool = tool({
   },
 });
 
+const makeHandoffTool = (conversationId: string) =>
+  tool({
+    description:
+      "Escalate this conversation to a human teammate. Call when the visitor asks for a person, is frustrated, needs pricing/credit approval, or the request is outside what you can confirm. After calling, tell the visitor a teammate will jump in.",
+    inputSchema: z.object({
+      reason: z.string().min(1).describe("Short internal note on why a human is needed"),
+      keep_ai_active: z
+        .boolean()
+        .optional()
+        .describe("True if you should keep answering meanwhile, false to stay quiet"),
+    }),
+    execute: async ({ reason, keep_ai_active }) => {
+      await supabase
+        .from("chat_conversations")
+        .update({
+          ai_enabled: keep_ai_active !== false,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq("id", conversationId);
+      await supabase.from("chat_messages").insert({
+        conversation_id: conversationId,
+        sender_type: "ai",
+        content: `_Internal note: human handoff requested — ${reason.slice(0, 300)}_`,
+      });
+      return { escalated: true };
+    },
+  });
+
 // --- AI reply ---------------------------------------------------------------
 
-async function generateAiReply(conversationId: string): Promise<string | null> {
+interface ReplyContext {
+  visitorName?: string | null;
+  pagePath?: string | null;
+}
+
+async function generateAiReply(
+  conversationId: string,
+  ctx: ReplyContext = {},
+): Promise<string | null> {
   const { data: history } = await supabase
     .from("chat_messages")
     .select("sender_type, content")
@@ -240,15 +276,24 @@ async function generateAiReply(conversationId: string): Promise<string | null> {
     .order("created_at", { ascending: true })
     .limit(40);
 
-
-  const messages = [
-    ...(history ?? []).map((m) => ({
-      role: (m.sender_type === "visitor" ? "user" : "assistant") as
-        | "user"
-        | "assistant",
+  // Full prior turns keep the assistant coherent; internal notes are stripped so
+  // the model never quotes them back to the visitor.
+  const messages = (history ?? [])
+    .filter((m) => !m.content.startsWith("_Internal note:"))
+    .map((m) => ({
+      role: (m.sender_type === "visitor" ? "user" : "assistant") as "user" | "assistant",
       content: m.content,
-    })),
-  ];
+    }));
+
+  const turnCount = messages.filter((m) => m.role === "user").length;
+  const contextLines = [
+    `Current UTC time: ${new Date().toISOString()}`,
+    ctx.visitorName ? `Visitor's name: ${ctx.visitorName}` : null,
+    ctx.pagePath ? `Page they are browsing right now: ${ctx.pagePath}` : null,
+    turnCount <= 1
+      ? "This is their FIRST message — greet them by name if you have it, answer the actual question, keep it short and inviting."
+      : "Ongoing conversation — do NOT re-introduce yourself or repeat earlier content.",
+  ].filter(Boolean);
 
   try {
     const provider = createOpenAICompatible({
@@ -260,19 +305,22 @@ async function generateAiReply(conversationId: string): Promise<string | null> {
       },
     });
 
-    const { text } = await generateText({
+    // Streamed inside the function: tool loops can run long, and a buffered call
+    // that emits nothing for ~2 minutes gets severed and re-billed.
+    const result = streamText({
       model: provider("google/gemini-3.6-flash"),
-      system: SYSTEM_PROMPT,
+      system: `${SYSTEM_PROMPT}\n\nSESSION CONTEXT\n${contextLines.join("\n")}`,
       messages,
       tools: {
         search_products: searchProductsTool,
         get_product_details: getProductDetailsTool,
         list_related_products: listRelatedProductsTool,
+        request_human_handoff: makeHandoffTool(conversationId),
       },
       stopWhen: stepCountIs(50),
     });
 
-
+    const text = await result.text;
     const reply = text?.trim() ||
       "I'm here — could you share a bit more so I can help?";
 
@@ -288,7 +336,19 @@ async function generateAiReply(conversationId: string): Promise<string | null> {
     return reply;
   } catch (e) {
     console.error("AI generation failed", e);
-    return null;
+    // Never leave the visitor staring at silence — post an honest human fallback.
+    const raw = String(e);
+    const fallback = raw.includes("429")
+      ? "Sorry — I'm getting a lot of questions at once right now. Give me a moment and resend, or reach our team at [/contact](/contact) and we'll reply fast."
+      : raw.includes("402")
+        ? "I can't reach my assistant service at the moment, but our team can help right away — drop your details at [/contact](/contact) or call +1 (612) 293-1250."
+        : "Something glitched on my side while pulling that up — sorry about that. Ask me again, or our team can take it directly at [/contact](/contact).";
+    await supabase.from("chat_messages").insert({
+      conversation_id: conversationId,
+      sender_type: "ai",
+      content: fallback,
+    });
+    return fallback;
   }
 }
 

@@ -591,16 +591,27 @@ const Products = () => {
                           {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
                           reorder — the first one is the main photo shown on cards and search results.
                         </p>
-                        {orderChanged(imageUrls, originalImageUrls) && (
-                          <button
-                            type="button"
-                            onClick={undoOrderChanges}
-                            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
-                          >
-                            <Undo2 className="h-3 w-3" />
-                            Undo order changes
-                          </button>
-                        )}
+                        <div className="flex items-center gap-3 shrink-0">
+                          {orderHistory.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={undoLastChange}
+                              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
+                            >
+                              <Undo2 className="h-3 w-3" />
+                              Undo ({orderHistory.length})
+                            </button>
+                          )}
+                          {orderChanged(imageUrls, originalImageUrls) && (
+                            <button
+                              type="button"
+                              onClick={undoAllChanges}
+                              className="text-xs text-muted-foreground hover:text-foreground underline"
+                            >
+                              Revert all
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         {imageUrls.map((url, index) => (

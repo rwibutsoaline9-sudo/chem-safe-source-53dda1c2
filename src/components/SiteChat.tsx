@@ -12,6 +12,13 @@ const VISITOR_KEY = "site-chat:visitor_id";
 const CONVO_KEY = "site-chat:conversation_id";
 const NAME_KEY = "site-chat:visitor_name";
 
+const QUICK_REPLIES = [
+  "I need a price quote",
+  "Send me the SDS",
+  "Shipping to my country?",
+  "Compare two grades",
+];
+
 interface Msg {
   id: string;
   sender_type: "visitor" | "admin" | "ai";
@@ -50,6 +57,11 @@ export const SiteChat = () => {
   const [sending, setSending] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Internal handoff notes are stored on the thread for admins — never shown to visitors.
+  const visibleMessages = useMemo(
+    () => messages.filter((m) => !m.content.startsWith("_Internal note:")),
+    [messages],
+  );
   const lastTimestampRef = useRef<string | null>(null);
 
   // Initial load when conversation becomes known
@@ -150,8 +162,8 @@ export const SiteChat = () => {
     return res.conversation_id;
   }
 
-  async function handleSend() {
-    const text = input.trim();
+  async function handleSend(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || sending) return;
 
     if (needsName && !name.trim()) {
@@ -182,6 +194,8 @@ export const SiteChat = () => {
         visitor_id: visitorId,
         conversation_id: convoId,
         content: text,
+        visitor_name: name || null,
+        page_path: typeof window !== "undefined" ? window.location.pathname : null,
       });
 
       if (!res?.message) {
@@ -266,13 +280,29 @@ export const SiteChat = () => {
               </div>
             )}
 
-            {!needsName && messages.length === 0 && (
-              <div className="text-sm bg-muted/50 rounded-lg p-3 leading-relaxed">
-                Hi {name || "there"}! How can we help — products, quotes, SDS, shipping?
+            {!needsName && visibleMessages.length === 0 && (
+              <div className="space-y-2">
+                <div className="text-sm bg-muted/50 rounded-lg p-3 leading-relaxed">
+                  Hi {name || "there"} 👋 I'm Alex. Tell me what you're sourcing — I can check purity,
+                  packaging, lead times and build a quote for you.
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUICK_REPLIES.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => handleSend(q)}
+                      disabled={sending}
+                      className="text-xs border border-border rounded-full px-2.5 py-1 hover:bg-muted transition-colors disabled:opacity-50"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {messages.map((m) => {
+            {visibleMessages.map((m) => {
               if (m.sender_type === "visitor") {
                 return (
                   <div key={m.id} className="flex justify-end">
@@ -288,7 +318,7 @@ export const SiteChat = () => {
                     <div className="flex items-center gap-1.5 mb-1 text-[11px] text-muted-foreground">
                       {m.sender_type === "ai" ? (
                         <>
-                          <Sparkles className="w-3 h-3" /> AI Assistant
+                          <Sparkles className="w-3 h-3" /> Alex · AI Assistant
                         </>
                       ) : (
                         <span className="font-medium text-primary">Support team</span>
@@ -324,7 +354,7 @@ export const SiteChat = () => {
 
             {aiThinking && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> AI is typing...
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Alex is typing…
               </div>
             )}
           </div>
@@ -345,7 +375,7 @@ export const SiteChat = () => {
                 className="min-h-[40px] max-h-32 resize-none text-sm"
                 disabled={sending}
               />
-              <Button onClick={handleSend} disabled={!input.trim() || sending} size="icon">
+              <Button onClick={() => handleSend()} disabled={!input.trim() || sending} size="icon">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>

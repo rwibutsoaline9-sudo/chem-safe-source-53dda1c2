@@ -4,7 +4,7 @@
 // in the real catalog instead of guessing.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createOpenAICompatible } from "npm:@ai-sdk/openai-compatible";
-import { generateText, tool, stepCountIs } from "npm:ai";
+import { streamText, tool, stepCountIs } from "npm:ai";
 import { z } from "npm:zod";
 
 const corsHeaders = {

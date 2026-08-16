@@ -218,18 +218,33 @@ const Products = () => {
   const orderChanged = (a: string[], b: string[]) =>
     a.length !== b.length || a.some((url, i) => url !== b[i]);
 
-  const undoOrderChanges = () => {
+  // Push the current gallery onto the history stack, then apply + persist the next one.
+  const applyGallery = (next: string[]) => {
+    setOrderHistory((prev) => [...prev, imageUrls].slice(-25));
+    setImageUrls(next);
+    persistImageOrder(next);
+  };
+
+  const undoLastChange = () => {
+    if (orderHistory.length === 0) return;
+    const previous = orderHistory[orderHistory.length - 1];
+    setOrderHistory((prev) => prev.slice(0, -1));
+    setImageUrls([...previous]);
+    if (editingProduct) persistImageOrder([...previous]);
+    toast.info(`Undid last change (${orderHistory.length - 1} step(s) left)`);
+  };
+
+  const undoAllChanges = () => {
+    setOrderHistory([]);
     setImageUrls([...originalImageUrls]);
     if (editingProduct) {
       persistImageOrder([...originalImageUrls]);
     }
-    toast.info('Image order reverted');
+    toast.info('Image order reverted to original');
   };
 
   const removeImage = (index: number) => {
-    const next = imageUrls.filter((_, i) => i !== index);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(imageUrls.filter((_, i) => i !== index));
   };
 
   const makeMainImage = (index: number) => {
@@ -237,8 +252,7 @@ const Products = () => {
     const next = [...imageUrls];
     const [picked] = next.splice(index, 1);
     next.unshift(picked);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(next);
   };
 
   const moveImage = (from: number | null, to: number) => {
@@ -247,9 +261,9 @@ const Products = () => {
     const next = [...imageUrls];
     const [picked] = next.splice(from, 1);
     next.splice(to, 0, picked);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(next);
   };
+
 
 
 

@@ -55,6 +55,7 @@ const Products = () => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
+  const [orderHistory, setOrderHistory] = useState<string[][]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -218,18 +219,33 @@ const Products = () => {
   const orderChanged = (a: string[], b: string[]) =>
     a.length !== b.length || a.some((url, i) => url !== b[i]);
 
-  const undoOrderChanges = () => {
+  // Push the current gallery onto the history stack, then apply + persist the next one.
+  const applyGallery = (next: string[]) => {
+    setOrderHistory((prev) => [...prev, imageUrls].slice(-25));
+    setImageUrls(next);
+    persistImageOrder(next);
+  };
+
+  const undoLastChange = () => {
+    if (orderHistory.length === 0) return;
+    const previous = orderHistory[orderHistory.length - 1];
+    setOrderHistory((prev) => prev.slice(0, -1));
+    setImageUrls([...previous]);
+    if (editingProduct) persistImageOrder([...previous]);
+    toast.info(`Undid last change (${orderHistory.length - 1} step(s) left)`);
+  };
+
+  const undoAllChanges = () => {
+    setOrderHistory([]);
     setImageUrls([...originalImageUrls]);
     if (editingProduct) {
       persistImageOrder([...originalImageUrls]);
     }
-    toast.info('Image order reverted');
+    toast.info('Image order reverted to original');
   };
 
   const removeImage = (index: number) => {
-    const next = imageUrls.filter((_, i) => i !== index);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(imageUrls.filter((_, i) => i !== index));
   };
 
   const makeMainImage = (index: number) => {
@@ -237,8 +253,7 @@ const Products = () => {
     const next = [...imageUrls];
     const [picked] = next.splice(index, 1);
     next.unshift(picked);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(next);
   };
 
   const moveImage = (from: number | null, to: number) => {
@@ -247,9 +262,9 @@ const Products = () => {
     const next = [...imageUrls];
     const [picked] = next.splice(from, 1);
     next.splice(to, 0, picked);
-    setImageUrls(next);
-    persistImageOrder(next);
+    applyGallery(next);
   };
+
 
 
 
@@ -361,6 +376,7 @@ const Products = () => {
           : [];
     setImageUrls(initialGallery);
     setOriginalImageUrls(initialGallery);
+    setOrderHistory([]);
     setDialogOpen(true);
   };
 
@@ -369,6 +385,7 @@ const Products = () => {
     setEditingProduct(null);
     setImageUrls([]);
     setOriginalImageUrls([]);
+    setOrderHistory([]);
     setUploads([]);
     setFormData({
       name: '',
@@ -576,16 +593,27 @@ const Products = () => {
                           {imageUrls.length} image(s) in this product's gallery. Drag thumbnails to
                           reorder — the first one is the main photo shown on cards and search results.
                         </p>
-                        {orderChanged(imageUrls, originalImageUrls) && (
-                          <button
-                            type="button"
-                            onClick={undoOrderChanges}
-                            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
-                          >
-                            <Undo2 className="h-3 w-3" />
-                            Undo order changes
-                          </button>
-                        )}
+                        <div className="flex items-center gap-3 shrink-0">
+                          {orderHistory.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={undoLastChange}
+                              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 underline"
+                            >
+                              <Undo2 className="h-3 w-3" />
+                              Undo ({orderHistory.length})
+                            </button>
+                          )}
+                          {orderChanged(imageUrls, originalImageUrls) && (
+                            <button
+                              type="button"
+                              onClick={undoAllChanges}
+                              className="text-xs text-muted-foreground hover:text-foreground underline"
+                            >
+                              Revert all
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         {imageUrls.map((url, index) => (

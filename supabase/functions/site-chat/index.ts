@@ -6,6 +6,12 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { createOpenAICompatible } from "npm:@ai-sdk/openai-compatible";
 import { streamText, tool, stepCountIs } from "npm:ai";
 import { z } from "npm:zod";
+import {
+  buildHandoffNote,
+  classifyFailure,
+  fallbackMessage,
+  sanitizeHistory,
+} from "./quality.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -304,8 +310,7 @@ async function generateAiReply(
 
   // Full prior turns keep the assistant coherent; internal notes are stripped so
   // the model never quotes them back to the visitor.
-  const messages = (history ?? [])
-    .filter((m) => !m.content.startsWith("_Internal note:"))
+  const messages = sanitizeHistory(history ?? [])
     .map((m) => ({
       role: (m.sender_type === "visitor" ? "user" : "assistant") as "user" | "assistant",
       content: m.content,
@@ -363,12 +368,7 @@ async function generateAiReply(
   } catch (e) {
     console.error("AI generation failed", e);
     // Never leave the visitor staring at silence — post an honest human fallback.
-    const raw = String(e);
-    const fallback = raw.includes("429")
-      ? "Sorry — I'm getting a lot of questions at once right now. Give me a moment and resend, or reach our team at [/contact](/contact) and we'll reply fast."
-      : raw.includes("402")
-        ? "I can't reach my assistant service at the moment, but our team can help right away — drop your details at [/contact](/contact) or call +1 (612) 293-1250."
-        : "Something glitched on my side while pulling that up — sorry about that. Ask me again, or our team can take it directly at [/contact](/contact).";
+    const fallback = fallbackMessage(classifyFailure(e));
     await supabase.from("chat_messages").insert({
       conversation_id: conversationId,
       sender_type: "ai",

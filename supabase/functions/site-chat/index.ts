@@ -233,30 +233,56 @@ const listRelatedProductsTool = tool({
 const makeHandoffTool = (conversationId: string) =>
   tool({
     description:
-      "Escalate this conversation to a human teammate. Call when the visitor asks for a person, is frustrated, needs pricing/credit approval, or the request is outside what you can confirm. After calling, tell the visitor a teammate will jump in.",
+      "Escalate this conversation to a human teammate. Call when the visitor asks for a person, is frustrated, needs pricing/credit approval, or the request is outside what you can confirm. Give the teammate a complete briefing so they never have to re-ask the visitor anything. After calling, tell the visitor a teammate will jump in.",
     inputSchema: z.object({
       reason: z.string().min(1).describe("Short internal note on why a human is needed"),
+      visitor_intent: z
+        .string()
+        .nullable()
+        .describe(
+          "What the visitor is actually trying to achieve (e.g. 'buy 5 MT caustic soda flakes for water treatment in Brazil, comparing suppliers')",
+        ),
+      unanswered_question: z
+        .string()
+        .nullable()
+        .describe("The visitor's exact last question that is still unanswered, quoted verbatim"),
+      compliance_constraints: z
+        .string()
+        .nullable()
+        .describe(
+          "SDS / COA / safety / KYC / regulatory constraints already discussed (e.g. 'asked for SDS in Portuguese; restricted item, KYC + business licence pending')",
+        ),
+      products_discussed: z
+        .array(z.string())
+        .nullable()
+        .describe("Product names or slugs already discussed in this conversation"),
+      quote_details: z
+        .string()
+        .nullable()
+        .describe("Quote facts already collected: quantity, packaging, destination, email, company"),
+      urgency: z.enum(["low", "normal", "high"]).nullable(),
       keep_ai_active: z
         .boolean()
-        .optional()
+        .nullable()
         .describe("True if you should keep answering meanwhile, false to stay quiet"),
     }),
-    execute: async ({ reason, keep_ai_active }) => {
+    execute: async (input) => {
       await supabase
         .from("chat_conversations")
         .update({
-          ai_enabled: keep_ai_active !== false,
+          ai_enabled: input.keep_ai_active !== false,
           last_message_at: new Date().toISOString(),
         })
         .eq("id", conversationId);
       await supabase.from("chat_messages").insert({
         conversation_id: conversationId,
         sender_type: "ai",
-        content: `_Internal note: human handoff requested — ${reason.slice(0, 300)}_`,
+        content: buildHandoffNote(input),
       });
       return { escalated: true };
     },
   });
+
 
 // --- AI reply ---------------------------------------------------------------
 

@@ -6,6 +6,12 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { createOpenAICompatible } from "npm:@ai-sdk/openai-compatible";
 import { streamText, tool, stepCountIs } from "npm:ai";
 import { z } from "npm:zod";
+import {
+  buildHandoffNote,
+  classifyFailure,
+  fallbackMessage,
+  sanitizeHistory,
+} from "./quality.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,7 +87,7 @@ CONVERSATION CRAFT (this is what makes you feel human)
 - If they're clearly ready to buy, stop selling and move straight to logistics: quantity, packaging, destination, email.
 - If they ask something outside chemicals (small talk, thanks, a joke), respond briefly and warmly like a person, then gently steer back.
 - If you don't know or the catalog doesn't have it, say so plainly and offer the alternative or a human follow-up. Confident honesty beats vague filler.
-- When they ask for a human, are upset, or the request needs pricing approval, call \`request_human_handoff\` and tell them a teammate is coming.
+- When they ask for a human, are upset, or the request needs pricing approval, call \`request_human_handoff\` and tell them a teammate is coming. Fill the briefing completely: their intent, the EXACT unanswered question in their own words, every SDS/COA/KYC/regulatory constraint already discussed, products discussed, quote facts collected and urgency. The teammate must never have to re-ask anything.
 
 FORMAT
 - Normal answers: 2-5 sentences. Product briefs: use the structured markdown above with **bold** labels and bullets — thorough but skimmable.
@@ -233,30 +239,56 @@ const listRelatedProductsTool = tool({
 const makeHandoffTool = (conversationId: string) =>
   tool({
     description:
-      "Escalate this conversation to a human teammate. Call when the visitor asks for a person, is frustrated, needs pricing/credit approval, or the request is outside what you can confirm. After calling, tell the visitor a teammate will jump in.",
+      "Escalate this conversation to a human teammate. Call when the visitor asks for a person, is frustrated, needs pricing/credit approval, or the request is outside what you can confirm. Give the teammate a complete briefing so they never have to re-ask the visitor anything. After calling, tell the visitor a teammate will jump in.",
     inputSchema: z.object({
       reason: z.string().min(1).describe("Short internal note on why a human is needed"),
+      visitor_intent: z
+        .string()
+        .nullable()
+        .describe(
+          "What the visitor is actually trying to achieve (e.g. 'buy 5 MT caustic soda flakes for water treatment in Brazil, comparing suppliers')",
+        ),
+      unanswered_question: z
+        .string()
+        .nullable()
+        .describe("The visitor's exact last question that is still unanswered, quoted verbatim"),
+      compliance_constraints: z
+        .string()
+        .nullable()
+        .describe(
+          "SDS / COA / safety / KYC / regulatory constraints already discussed (e.g. 'asked for SDS in Portuguese; restricted item, KYC + business licence pending')",
+        ),
+      products_discussed: z
+        .array(z.string())
+        .nullable()
+        .describe("Product names or slugs already discussed in this conversation"),
+      quote_details: z
+        .string()
+        .nullable()
+        .describe("Quote facts already collected: quantity, packaging, destination, email, company"),
+      urgency: z.enum(["low", "normal", "high"]).nullable(),
       keep_ai_active: z
         .boolean()
-        .optional()
+        .nullable()
         .describe("True if you should keep answering meanwhile, false to stay quiet"),
     }),
-    execute: async ({ reason, keep_ai_active }) => {
+    execute: async (input) => {
       await supabase
         .from("chat_conversations")
         .update({
-          ai_enabled: keep_ai_active !== false,
+          ai_enabled: input.keep_ai_active !== false,
           last_message_at: new Date().toISOString(),
         })
         .eq("id", conversationId);
       await supabase.from("chat_messages").insert({
         conversation_id: conversationId,
         sender_type: "ai",
-        content: `_Internal note: human handoff requested — ${reason.slice(0, 300)}_`,
+        content: buildHandoffNote(input),
       });
       return { escalated: true };
     },
   });
+
 
 // --- AI reply ---------------------------------------------------------------
 
@@ -278,8 +310,7 @@ async function generateAiReply(
 
   // Full prior turns keep the assistant coherent; internal notes are stripped so
   // the model never quotes them back to the visitor.
-  const messages = (history ?? [])
-    .filter((m) => !m.content.startsWith("_Internal note:"))
+  const messages = sanitizeHistory(history ?? [])
     .map((m) => ({
       role: (m.sender_type === "visitor" ? "user" : "assistant") as "user" | "assistant",
       content: m.content,
@@ -337,12 +368,7 @@ async function generateAiReply(
   } catch (e) {
     console.error("AI generation failed", e);
     // Never leave the visitor staring at silence — post an honest human fallback.
-    const raw = String(e);
-    const fallback = raw.includes("429")
-      ? "Sorry — I'm getting a lot of questions at once right now. Give me a moment and resend, or reach our team at [/contact](/contact) and we'll reply fast."
-      : raw.includes("402")
-        ? "I can't reach my assistant service at the moment, but our team can help right away — drop your details at [/contact](/contact) or call +1 (612) 293-1250."
-        : "Something glitched on my side while pulling that up — sorry about that. Ask me again, or our team can take it directly at [/contact](/contact).";
+    const fallback = fallbackMessage(classifyFailure(e));
     await supabase.from("chat_messages").insert({
       conversation_id: conversationId,
       sender_type: "ai",

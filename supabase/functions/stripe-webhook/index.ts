@@ -42,20 +42,20 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get webhook secret from payment_settings
-    const { data: settings } = await supabase
-      .from("payment_settings")
-      .select("webhook_secret")
-      .limit(1)
-      .single();
-
-    if (settings?.webhook_secret) {
-      const valid = await verifySignature(body, sigHeader, settings.webhook_secret);
-      if (!valid) {
-        console.error("Invalid webhook signature");
-        return new Response("Invalid signature", { status: 401 });
-      }
+    // Webhook signing secret comes from the Supabase secret store only.
+    // Fail closed: an unsigned/unverifiable request is never processed.
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!webhookSecret) {
+      console.error("STRIPE_WEBHOOK_SECRET is not configured; rejecting webhook");
+      return new Response("Webhook not configured", { status: 500 });
     }
+
+    const valid = await verifySignature(body, sigHeader, webhookSecret);
+    if (!valid) {
+      console.error("Invalid webhook signature");
+      return new Response("Invalid signature", { status: 401 });
+    }
+
 
     const event = JSON.parse(body);
     const paymentIntent = event.data?.object;

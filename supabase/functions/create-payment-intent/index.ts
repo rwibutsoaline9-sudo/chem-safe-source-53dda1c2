@@ -25,20 +25,47 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // The secret key lives ONLY in the Supabase secret store, never in the DB.
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      console.error("STRIPE_SECRET_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Stripe is not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // The DB row still holds the non-secret toggles (enabled / test-live mode).
     const { data: settings } = await supabase
       .from("payment_settings")
-      .select("stripe_secret_key, stripe_enabled, stripe_mode")
+      .select("stripe_enabled, stripe_mode")
       .limit(1)
       .single();
 
-    if (!settings?.stripe_enabled || !settings?.stripe_secret_key) {
-      return new Response(JSON.stringify({ error: "Stripe is not configured" }), {
+    if (!settings?.stripe_enabled) {
+      return new Response(JSON.stringify({ error: "Stripe is not enabled" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const stripeKey = settings.stripe_secret_key;
+    // Guard against a test key being used while the store is in live mode.
+    const keyIsLive = stripeKey.startsWith("sk_live_");
+    if (settings.stripe_mode === "live" && !keyIsLive) {
+      console.error("Live mode enabled but STRIPE_SECRET_KEY is a test key");
+      return new Response(JSON.stringify({ error: "Stripe key does not match live mode" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (settings.stripe_mode !== "live" && keyIsLive) {
+      console.error("Test mode enabled but STRIPE_SECRET_KEY is a live key");
+      return new Response(JSON.stringify({ error: "Stripe key does not match test mode" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 

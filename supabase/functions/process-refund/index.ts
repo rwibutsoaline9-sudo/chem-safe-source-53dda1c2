@@ -73,16 +73,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get stripe key
-    const { data: settings } = await adminClient
-      .from("payment_settings")
-      .select("stripe_secret_key")
-      .limit(1)
-      .single();
-
-    if (!settings?.stripe_secret_key) {
+    // Stripe secret key comes from the Supabase secret store only.
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      console.error("STRIPE_SECRET_KEY is not configured");
       return new Response(JSON.stringify({ error: "Stripe not configured" }), {
-        status: 400,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -91,7 +87,7 @@ Deno.serve(async (req) => {
     const stripeRes = await fetch("https://api.stripe.com/v1/refunds", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${settings.stripe_secret_key}`,
+        Authorization: `Bearer ${stripeKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({

@@ -8,15 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Save, Shield, Zap } from 'lucide-react';
+import { CreditCard, Save, Shield, Zap } from 'lucide-react';
 
 interface PaymentSettings {
   id: string;
   stripe_enabled: boolean;
   stripe_public_key: string | null;
-  stripe_secret_key: string | null;
   stripe_mode: string;
-  webhook_secret: string | null;
   subscriptions_enabled: boolean;
   one_time_enabled: boolean;
   paypal_enabled: boolean;
@@ -31,8 +29,6 @@ const StripeSettings = () => {
   const [settings, setSettings] = useState<PaymentSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showSecretKey, setShowSecretKey] = useState(false);
-  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -81,9 +77,7 @@ const StripeSettings = () => {
       .update({
         stripe_enabled: settings.stripe_enabled,
         stripe_public_key: settings.stripe_public_key,
-        stripe_secret_key: settings.stripe_secret_key,
         stripe_mode: settings.stripe_mode,
-        webhook_secret: settings.webhook_secret,
         subscriptions_enabled: settings.subscriptions_enabled,
         one_time_enabled: settings.one_time_enabled,
         paypal_enabled: settings.paypal_enabled,
@@ -191,48 +185,23 @@ const StripeSettings = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Secret Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showSecretKey ? 'text' : 'password'}
-                    placeholder="sk_test_... or sk_live_..."
-                    value={settings?.stripe_secret_key ?? ''}
-                    onChange={(e) => updateField('stripe_secret_key', e.target.value)}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowSecretKey(!showSecretKey)}
-                  >
-                    {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+              <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">Secret key &amp; webhook secret</p>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Webhook Secret</Label>
-                <div className="relative">
-                  <Input
-                    type={showWebhookSecret ? 'text' : 'password'}
-                    placeholder="whsec_..."
-                    value={settings?.webhook_secret ?? ''}
-                    onChange={(e) => updateField('webhook_secret', e.target.value)}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowWebhookSecret(!showWebhookSecret)}
-                  >
-                    {showWebhookSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  These are no longer stored in the database. They live in the encrypted secret
+                  store as <code className="text-xs">STRIPE_SECRET_KEY</code> and{' '}
+                  <code className="text-xs">STRIPE_WEBHOOK_SECRET</code>, and are read directly by
+                  the payment edge functions — so they never reach the browser.
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Get this from your Stripe Dashboard → Developers → Webhooks
+                  Update them from Project Settings → Secrets. The webhook signing secret comes from
+                  your Stripe Dashboard → Developers → Webhooks.
                 </p>
               </div>
+
             </CardContent>
           </Card>
 

@@ -355,10 +355,8 @@ export type Database = {
           stripe_enabled: boolean
           stripe_mode: string
           stripe_public_key: string | null
-          stripe_secret_key: string | null
           subscriptions_enabled: boolean
           updated_at: string
-          webhook_secret: string | null
         }
         Insert: {
           created_at?: string
@@ -373,10 +371,8 @@ export type Database = {
           stripe_enabled?: boolean
           stripe_mode?: string
           stripe_public_key?: string | null
-          stripe_secret_key?: string | null
           subscriptions_enabled?: boolean
           updated_at?: string
-          webhook_secret?: string | null
         }
         Update: {
           created_at?: string
@@ -391,10 +387,8 @@ export type Database = {
           stripe_enabled?: boolean
           stripe_mode?: string
           stripe_public_key?: string | null
-          stripe_secret_key?: string | null
           subscriptions_enabled?: boolean
           updated_at?: string
-          webhook_secret?: string | null
         }
         Relationships: []
       }

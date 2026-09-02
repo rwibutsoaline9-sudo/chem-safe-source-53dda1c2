@@ -8,15 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Save, Shield, Zap } from 'lucide-react';
+import { CreditCard, Save, Shield, Zap } from 'lucide-react';
 
 interface PaymentSettings {
   id: string;
   stripe_enabled: boolean;
   stripe_public_key: string | null;
-  stripe_secret_key: string | null;
   stripe_mode: string;
-  webhook_secret: string | null;
   subscriptions_enabled: boolean;
   one_time_enabled: boolean;
   paypal_enabled: boolean;
@@ -31,8 +29,6 @@ const StripeSettings = () => {
   const [settings, setSettings] = useState<PaymentSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showSecretKey, setShowSecretKey] = useState(false);
-  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -81,9 +77,7 @@ const StripeSettings = () => {
       .update({
         stripe_enabled: settings.stripe_enabled,
         stripe_public_key: settings.stripe_public_key,
-        stripe_secret_key: settings.stripe_secret_key,
         stripe_mode: settings.stripe_mode,
-        webhook_secret: settings.webhook_secret,
         subscriptions_enabled: settings.subscriptions_enabled,
         one_time_enabled: settings.one_time_enabled,
         paypal_enabled: settings.paypal_enabled,

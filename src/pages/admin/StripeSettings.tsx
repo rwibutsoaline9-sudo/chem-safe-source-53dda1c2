@@ -191,48 +191,23 @@ const StripeSettings = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Secret Key</Label>
-                <div className="relative">
-                  <Input
-                    type={showSecretKey ? 'text' : 'password'}
-                    placeholder="sk_test_... or sk_live_..."
-                    value={settings?.stripe_secret_key ?? ''}
-                    onChange={(e) => updateField('stripe_secret_key', e.target.value)}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowSecretKey(!showSecretKey)}
-                  >
-                    {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+              <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">Secret key &amp; webhook secret</p>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Webhook Secret</Label>
-                <div className="relative">
-                  <Input
-                    type={showWebhookSecret ? 'text' : 'password'}
-                    placeholder="whsec_..."
-                    value={settings?.webhook_secret ?? ''}
-                    onChange={(e) => updateField('webhook_secret', e.target.value)}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setShowWebhookSecret(!showWebhookSecret)}
-                  >
-                    {showWebhookSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  These are no longer stored in the database. They live in the encrypted secret
+                  store as <code className="text-xs">STRIPE_SECRET_KEY</code> and{' '}
+                  <code className="text-xs">STRIPE_WEBHOOK_SECRET</code>, and are read directly by
+                  the payment edge functions — so they never reach the browser.
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Get this from your Stripe Dashboard → Developers → Webhooks
+                  Update them from Project Settings → Secrets. The webhook signing secret comes from
+                  your Stripe Dashboard → Developers → Webhooks.
                 </p>
               </div>
+
             </CardContent>
           </Card>
 

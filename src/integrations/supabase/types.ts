@@ -479,6 +479,60 @@ export type Database = {
         }
         Relationships: []
       }
+      refund_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_name: string
+          details: string | null
+          email: string
+          id: string
+          order_reference: string
+          phone: string | null
+          preferred_resolution: string
+          product_name: string
+          purchase_date: string | null
+          quantity: string | null
+          reason: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_name: string
+          details?: string | null
+          email: string
+          id?: string
+          order_reference: string
+          phone?: string | null
+          preferred_resolution?: string
+          product_name: string
+          purchase_date?: string | null
+          quantity?: string | null
+          reason: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_name?: string
+          details?: string | null
+          email?: string
+          id?: string
+          order_reference?: string
+          phone?: string | null
+          preferred_resolution?: string
+          product_name?: string
+          purchase_date?: string | null
+          quantity?: string | null
+          reason?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancelled_at: string | null

@@ -3,8 +3,9 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 import { COUNTRIES } from "../src/data/countries";
+import { SITE_URL } from "../src/config/site";
 
-const BASE_URL = "https://chem-safe-source.lovable.app";
+const BASE_URL = SITE_URL;
 
 interface SitemapEntry {
   path: string;

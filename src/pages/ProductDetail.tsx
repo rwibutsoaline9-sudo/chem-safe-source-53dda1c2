@@ -328,7 +328,7 @@ const ProductDetail = () => {
 
           <ProductFAQ
             product={product}
-            pageUrl={`https://chem-safe-source.lovable.app/products/${slug}`}
+            pageUrl={absoluteUrl(`/products/${slug}`)}
           />
         </div>
       </section>

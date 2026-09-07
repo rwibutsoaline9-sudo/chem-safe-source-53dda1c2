@@ -13,7 +13,7 @@ import {
   type CountryContent,
 } from "@/data/countries";
 
-const SITE_URL = "https://chem-safe-source.lovable.app";
+import { SITE_URL } from "@/config/site";
 
 const buildFaq = (c: CountryContent) => [
   {

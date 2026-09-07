@@ -8,7 +8,7 @@ import { ShieldCheck, Ship, FileCheck2, Globe } from "lucide-react";
 import { REGIONS, REGION_LIST, type RegionId } from "@/data/regions";
 import { RegionChat } from "@/components/RegionChat";
 
-const SITE_URL = "https://chem-safe-source.lovable.app";
+import { SITE_URL } from "@/config/site";
 
 const RegionLanding = () => {
   const { regionSlug } = useParams<{ regionSlug: string }>();

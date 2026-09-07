@@ -11,6 +11,7 @@ import { getProductImage, getProductImageStyle } from "@/lib/productImages";
 import { SEO } from "@/components/SEO";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ProductFAQ } from "@/components/ProductFAQ";
+import { absoluteUrl } from "@/config/site";
 
 interface Product {
   id: string;
@@ -328,7 +329,7 @@ const ProductDetail = () => {
 
           <ProductFAQ
             product={product}
-            pageUrl={`https://chem-safe-source.lovable.app/products/${slug}`}
+            pageUrl={absoluteUrl(`/products/${slug}`)}
           />
         </div>
       </section>

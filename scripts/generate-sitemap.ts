@@ -3,8 +3,9 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 import { COUNTRIES } from "../src/data/countries";
+import { SITE_URL } from "../src/config/site";
 
-const BASE_URL = "https://chem-safe-source.lovable.app";
+const BASE_URL = SITE_URL;
 
 interface SitemapEntry {
   path: string;
@@ -91,9 +92,36 @@ function generateSitemap(entries: SitemapEntry[]) {
   ].join("\n");
 }
 
+function generateRobots(): string {
+  return [
+    "User-agent: Googlebot",
+    "Allow: /",
+    "",
+    "User-agent: Bingbot",
+    "Allow: /",
+    "",
+    "User-agent: Twitterbot",
+    "Allow: /",
+    "",
+    "User-agent: facebookexternalhit",
+    "Allow: /",
+    "",
+    "User-agent: *",
+    "Allow: /",
+    "Disallow: /admin",
+    "Disallow: /auth",
+    "Disallow: /checkout",
+    "",
+    `Sitemap: ${BASE_URL}/sitemap.xml`,
+    "",
+  ].join("\n");
+}
+
 (async () => {
   const products = await fetchProductEntries();
   const entries = [...staticEntries, ...products];
   writeFileSync(resolve("public/sitemap.xml"), generateSitemap(entries));
   console.log(`sitemap.xml written (${entries.length} entries)`);
+  writeFileSync(resolve("public/robots.txt"), generateRobots());
+  console.log(`robots.txt written (${BASE_URL})`);
 })();

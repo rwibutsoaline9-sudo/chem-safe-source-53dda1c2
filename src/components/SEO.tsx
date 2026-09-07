@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://chem-safe-source.lovable.app";
+import { SITE_URL } from "@/config/site";
 
 interface SEOProps {
   title: string;

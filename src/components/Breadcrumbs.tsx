@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
-const SITE_URL = "https://chem-safe-source.lovable.app";
+import { SITE_URL } from "@/config/site";
 
 export interface Crumb {
   name: string;

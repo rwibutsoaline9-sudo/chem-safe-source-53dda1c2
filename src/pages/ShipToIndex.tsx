@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { COUNTRIES_BY_REGION, REGION_LABEL, COUNTRIES } from "@/data/countries";
 
-const SITE_URL = "https://chem-safe-source.lovable.app";
+import { SITE_URL } from "@/config/site";
 
 const ShipToIndex = () => {
   const title = `Worldwide Industrial Chemical Shipping — ${COUNTRIES.length} Countries`;

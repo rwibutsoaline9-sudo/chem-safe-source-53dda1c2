@@ -6,11 +6,13 @@
  * reads it from here. To move the site to a real custom domain, change
  * VITE_SITE_URL in the environment (or the fallback below) and nothing else.
  */
+declare const process: { env?: Record<string, string | undefined> } | undefined;
+
 const RAW_SITE_URL =
   // Browser / Vite build
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_SITE_URL) ||
   // Node (the sitemap generator runs outside Vite)
-  (typeof process !== "undefined" ? process.env?.VITE_SITE_URL : undefined) ||
+  (typeof process !== "undefined" ? process?.env?.VITE_SITE_URL : undefined) ||
   "https://chem-safe-source.lovable.app";
 
 /** Absolute origin, never with a trailing slash. */

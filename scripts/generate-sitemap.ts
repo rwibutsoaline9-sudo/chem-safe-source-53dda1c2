@@ -23,6 +23,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/terms", changefreq: "yearly", priority: "0.3" },
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
   { path: "/shipping", changefreq: "yearly", priority: "0.3" },
+  { path: "/returns", changefreq: "yearly", priority: "0.4" },
   // Localized regional landing pages
   { path: "/regions/europe", changefreq: "monthly", priority: "0.8" },
   { path: "/regions/middle-east", changefreq: "monthly", priority: "0.8" },

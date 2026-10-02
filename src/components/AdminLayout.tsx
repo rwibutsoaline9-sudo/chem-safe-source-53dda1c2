@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Settings, LogOut, Menu, X, CreditCard, DollarSign, MessageSquare, MessageCircle, ScanSearch } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, Menu, X, CreditCard, DollarSign, MessageSquare, MessageCircle, ScanSearch, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -31,6 +31,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     { to: '/admin/products', icon: Package, label: 'Products' },
     { to: '/admin/messages', icon: MessageSquare, label: 'Messages' },
     { to: '/admin/live-chat', icon: MessageCircle, label: 'Live Chat' },
+    { to: '/admin/returns', icon: RotateCcw, label: 'Returns' },
     { to: '/admin/bulk-import', icon: Menu, label: 'Bulk Import' },
     { to: '/admin/image-similarity', icon: ScanSearch, label: 'Image Scan' },
     { to: '/admin/payments', icon: DollarSign, label: 'Payments' },

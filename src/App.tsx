@@ -17,6 +17,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
 import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
+import Returns from "./pages/Returns";
+import AdminReturns from "./pages/admin/Returns";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
@@ -66,6 +68,7 @@ const App = () => {
             <Route path="/terms" element={<PublicLayout><TermsOfService /></PublicLayout>} />
             <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
             <Route path="/shipping" element={<PublicLayout><ShippingPolicy /></PublicLayout>} />
+            <Route path="/returns" element={<PublicLayout><Returns /></PublicLayout>} />
 
             {/* Regional landing pages (localized SEO) */}
             <Route path="/regions/:regionSlug" element={<PublicLayout><RegionLanding /></PublicLayout>} />
@@ -89,6 +92,7 @@ const App = () => {
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
             <Route path="/admin/live-chat" element={<ProtectedRoute><AdminLiveChat /></ProtectedRoute>} />
+            <Route path="/admin/returns" element={<ProtectedRoute><AdminReturns /></ProtectedRoute>} />
             <Route path="/admin/image-similarity" element={<ProtectedRoute><ImageSimilarity /></ProtectedRoute>} />
             
             {/* 404 */}

@@ -139,15 +139,15 @@ const Contact = () => {
             <div className="lg:col-span-2">
               {submitted ? (
                 <PaymentOptions
-                  selectedProduct={selectedProduct!}
-                  quantity={formData.quantity}
+                  lines={lines}
                   totalPrice={totalPrice}
                   onPayNow={handlePayNow}
                   onNewQuote={() => {
                     setSubmitted(false);
+                    setItems([{ productId: "", quantity: 1 }]);
                     setFormData({
                       businessName: "", contactName: "", email: "", phone: "",
-                      productId: "", quantity: 1, message: "", promoCode: "",
+                      message: "", promoCode: "",
                     });
                   }}
                   formData={formData}
@@ -156,10 +156,13 @@ const Contact = () => {
                 <QuoteForm
                   formData={formData}
                   products={products}
-                  selectedProduct={selectedProduct}
+                  items={items}
+                  setItems={setItems}
+                  subtotal={subtotal}
+                  discount={discountAmount}
                   totalPrice={totalPrice}
+                  submitting={submitting}
                   onChange={handleChange}
-                  onProductChange={(id) => setFormData((prev) => ({ ...prev, productId: id }))}
                   onSubmit={handleSubmit}
                 />
               )}
@@ -177,18 +180,24 @@ const Contact = () => {
 const QuoteForm = ({
   formData,
   products,
-  selectedProduct,
+  items,
+  setItems,
+  subtotal,
+  discount,
   totalPrice,
+  submitting,
   onChange,
-  onProductChange,
   onSubmit,
 }: {
   formData: Record<string, any>;
   products: DBProduct[];
-  selectedProduct: DBProduct | undefined;
+  items: QuoteLine[];
+  setItems: React.Dispatch<React.SetStateAction<QuoteLine[]>>;
+  subtotal: number;
+  discount: number;
   totalPrice: number;
+  submitting: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onProductChange: (id: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) => (
   <Card>

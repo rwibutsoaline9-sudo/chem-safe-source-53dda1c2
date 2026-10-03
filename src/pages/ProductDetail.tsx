@@ -309,7 +309,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/contact" className="flex-1">
+                <Link to={`/contact?product=${product.id}`} className="flex-1">
                   <Button size="lg" className="w-full">
                     Request Quote
                   </Button>

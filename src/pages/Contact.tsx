@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, CreditCard, Mail, MapPin, MessageCircle, Phone, Upload } from "lucide-react";
+import { Clock, CreditCard, Mail, MapPin, MessageCircle, Phone, Plus, Trash2, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -226,40 +226,62 @@ const QuoteForm = ({
             <Input id="phone" name="phone" type="tel" required value={formData.phone} onChange={onChange} placeholder="+1 (555) 000-0000" />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <Label>Product of Interest *</Label>
-            <Select value={formData.productId} onValueChange={onProductChange} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a product" />
-              </SelectTrigger>
-              <SelectContent>
-                {products.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name} — ${p.price_value.toLocaleString()}/{p.price_unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="quantity">Required Quantity *</Label>
-            <Input
-              id="quantity"
-              name="quantity"
-              type="number"
-              min="1"
-              required
-              value={formData.quantity}
-              onChange={onChange}
-              placeholder="e.g., 10"
-            />
-            {selectedProduct && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Unit: {selectedProduct.price_unit}
-              </p>
-            )}
-          </div>
+        <div className="space-y-3">
+          <Label>Products *</Label>
+          {items.map((item, idx) => {
+            const p = products.find((x) => x.id === item.productId);
+            const usedIds = items.filter((_, i) => i !== idx).map((i) => i.productId);
+            return (
+              <div key={idx} className="grid grid-cols-[1fr_7rem_auto] gap-2 items-start">
+                <div>
+                  <Select
+                    value={item.productId}
+                    onValueChange={(id) => setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, productId: id } : it)))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.filter((x) => !usedIds.includes(x.id)).map((x) => (
+                        <SelectItem key={x.id} value={x.id}>
+                          {x.name} — ${x.price_value.toLocaleString()}/{x.price_unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {p && <p className="text-xs text-muted-foreground mt-1">Unit: {p.price_unit}</p>}
+                </div>
+                <Input
+                  type="number"
+                  min="1"
+                  aria-label="Quantity"
+                  value={item.quantity}
+                  onChange={(e) => {
+                    const q = Math.max(1, parseInt(e.target.value) || 1);
+                    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, quantity: q } : it)));
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remove product"
+                  disabled={items.length === 1}
+                  onClick={() => setItems((prev) => prev.filter((_, i) => i !== idx))}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            );
+          })}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setItems((prev) => [...prev, { productId: "", quantity: 1 }])}
+          >
+            <Plus className="w-4 h-4 mr-1" /> Add another product
+          </Button>
         </div>
 
         {/* Promo Code */}
@@ -282,43 +304,33 @@ const QuoteForm = ({
           )}
         </div>
 
-        {/* Price Summary */}
-        {selectedProduct && (() => {
-          const subtotal = selectedProduct.price_value * formData.quantity;
-          const valid = formData.promoCode.trim().toUpperCase() === PROMO_CODE;
-          const discount = valid ? subtotal * (PROMO_PERCENT / 100) : 0;
-          return (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-muted-foreground">Unit Price</span>
-                  <span className="font-medium">${selectedProduct.price_value.toLocaleString()} / {selectedProduct.price_unit}</span>
+        {subtotal > 0 && (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center text-sm mb-1">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between items-center text-sm mb-2 text-primary">
+                  <span>Promo {PROMO_CODE} (-{PROMO_PERCENT}%)</span>
+                  <span className="font-semibold">−${discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-                {valid && (
-                  <div className="flex justify-between items-center text-sm mb-2 text-primary">
-                    <span>Promo {PROMO_CODE} (-{PROMO_PERCENT}%)</span>
-                    <span className="font-semibold">−${discount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                )}
-                <div className="border-t border-primary/20 pt-2 flex justify-between items-center">
-                  <span className="font-semibold">Estimated Total</span>
-                  <span className="text-xl font-bold text-primary">${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })()}
+              )}
+              <div className="border-t border-primary/20 pt-2 flex justify-between items-center">
+                <span className="font-semibold">Estimated Total</span>
+                <span className="text-xl font-bold text-primary">${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div>
           <Label htmlFor="message">Additional Information</Label>
           <Textarea id="message" name="message" value={formData.message} onChange={onChange} placeholder="Delivery location, timeline, special requirements..." rows={4} />
         </div>
         <div>
-          <Label>Business License / KYC Documents</Label>
+          <Label>Business License / KYC Documents (optional)</Label>
           <div className="mt-2 flex items-center justify-center w-full">
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-border border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -332,11 +344,11 @@ const QuoteForm = ({
             </label>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Required for restricted chemicals. Accelerates quote processing.
+            Optional. You can share documents later if needed.
           </p>
         </div>
-        <Button type="submit" size="lg" className="w-full" disabled={!formData.productId}>
-          Submit Quote Request
+        <Button type="submit" size="lg" className="w-full" disabled={submitting || !items.some((i) => i.productId)}>
+          {submitting ? "Submitting..." : "Submit Quote Request"}
         </Button>
       </form>
     </CardContent>
@@ -344,15 +356,13 @@ const QuoteForm = ({
 );
 
 const PaymentOptions = ({
-  selectedProduct,
-  quantity,
+  lines,
   totalPrice,
   onPayNow,
   onNewQuote,
   formData,
 }: {
-  selectedProduct: DBProduct;
-  quantity: number;
+  lines: (QuoteLine & { product: DBProduct })[];
   totalPrice: number;
   onPayNow: (percentage: number) => void;
   onNewQuote: () => void;
@@ -399,8 +409,11 @@ const PaymentOptions = ({
           <div className="rounded-lg bg-muted/50 p-4 space-y-2">
             <p className="text-sm"><strong>Business:</strong> {formData.businessName}</p>
             <p className="text-sm"><strong>Contact:</strong> {formData.contactName}</p>
-            <p className="text-sm"><strong>Product:</strong> {selectedProduct.name}</p>
-            <p className="text-sm"><strong>Quantity:</strong> {quantity} × ${selectedProduct.price_value.toLocaleString()}/{selectedProduct.price_unit}</p>
+            {lines.map((l) => (
+              <p key={l.productId} className="text-sm">
+                <strong>{l.product.name}:</strong> {l.quantity} × ${l.product.price_value.toLocaleString()}/{l.product.price_unit}
+              </p>
+            ))}
             <div className="border-t border-border pt-2 mt-2">
               <p className="text-lg font-bold">Total: ${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
             </div>

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, CreditCard, Mail, MapPin, MessageCircle, Phone, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
@@ -20,22 +20,29 @@ interface DBProduct {
   price_currency: string;
 }
 
+export interface QuoteLine {
+  productId: string;
+  quantity: number;
+}
+
 const Contact = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<DBProduct[]>([]);
+  const [items, setItems] = useState<QuoteLine[]>([
+    { productId: searchParams.get("product") || "", quantity: 1 },
+  ]);
   const [formData, setFormData] = useState({
     businessName: "",
     contactName: "",
     email: "",
     phone: "",
-    productId: "",
-    quantity: 1,
     message: "",
     promoCode: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Auto-apply promo code from banner
   useEffect(() => {
     if (typeof window === "undefined") return;
     const applied = sessionStorage.getItem(PROMO_STORAGE_KEY);
@@ -53,35 +60,35 @@ const Contact = () => {
     fetchProducts();
   }, []);
 
-  const selectedProduct = products.find((p) => p.id === formData.productId);
-  const subtotal = selectedProduct ? selectedProduct.price_value * formData.quantity : 0;
+  const lines = items
+    .map((i) => ({ ...i, product: products.find((p) => p.id === i.productId) }))
+    .filter((l): l is QuoteLine & { product: DBProduct } => !!l.product);
+  const subtotal = lines.reduce((s, l) => s + l.product.price_value * l.quantity, 0);
   const promoValid = formData.promoCode.trim().toUpperCase() === PROMO_CODE;
   const discountAmount = promoValid ? subtotal * (PROMO_PERCENT / 100) : 0;
   const totalPrice = subtotal - discountAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProduct) {
-      toast.error("Please select a product");
+    if (lines.length === 0) {
+      toast.error("Please select at least one product");
       return;
     }
-    if (formData.quantity <= 0) {
-      toast.error("Quantity must be at least 1");
-      return;
-    }
-
+    setSubmitting(true);
     const { error } = await supabase.from("contact_messages").insert({
-      business_name: formData.businessName,
-      contact_name: formData.contactName,
-      email: formData.email,
-      phone: formData.phone,
-      product: selectedProduct.name,
-      quantity: String(formData.quantity),
-      message: formData.message,
+      business_name: formData.businessName.trim(),
+      contact_name: formData.contactName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      product: lines.map((l) => l.product.name).join(", ").slice(0, 4000),
+      quantity: lines.map((l) => `${l.product.name}: ${l.quantity} ${l.product.price_unit}`).join("; ").slice(0, 1000),
+      message: formData.message || null,
     });
+    setSubmitting(false);
 
     if (error) {
-      toast.error("Failed to submit quote request");
+      console.error(error);
+      toast.error("Failed to submit quote request. Please check your details and try again.");
       return;
     }
 
@@ -91,21 +98,19 @@ const Contact = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "quantity" ? Math.max(1, parseInt(value) || 1) : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePayNow = (percentage: number) => {
-    if (!selectedProduct) return;
+    if (lines.length === 0) return;
     const payAmount = totalPrice * (percentage / 100);
+    const totalQty = lines.reduce((s, l) => s + l.quantity, 0);
     const params = new URLSearchParams({
       amount: payAmount.toFixed(2),
       email: formData.email,
-      product: selectedProduct.name,
-      quantity: String(formData.quantity),
-      unitPrice: selectedProduct.price_value.toFixed(2),
+      product: lines.map((l) => `${l.product.name} ×${l.quantity}`).join(", "),
+      quantity: String(totalQty),
+      unitPrice: (subtotal / Math.max(1, totalQty)).toFixed(2),
       totalPrice: totalPrice.toFixed(2),
       plan: String(percentage),
     });

@@ -5,6 +5,7 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const isId = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f-]{36}$/i.test(v);
 
 const MESSAGES: Record<string, string> = {
   reviewing: "Our team is now reviewing your request.",
@@ -28,37 +29,52 @@ Deno.serve(async (req) => {
     if (!role) return json({ error: "Admin access required" }, 403);
 
     const body = await req.json().catch(() => ({}));
-    const id = typeof body.request_id === "string" ? body.request_id : "";
-    if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: "request_id required" }, 400);
+    const action = body.action === "send" ? "send" : "draft";
 
-    const { data: r } = await admin.from("refund_requests").select("*").eq("id", id).maybeSingle();
-    if (!r) return json({ error: "Not found" }, 404);
-    const msg = MESSAGES[r.status];
-    if (!msg) return json({ emailed: false, reason: "status has no email" });
+    if (action === "draft") {
+      if (!isId(body.request_id)) return json({ error: "request_id required" }, 400);
+      const { data: r } = await admin.from("refund_requests").select("*").eq("id", body.request_id).maybeSingle();
+      if (!r) return json({ error: "Not found" }, 404);
+      const msg = MESSAGES[r.status];
+      if (!msg) return json({ drafted: false });
+      const from = Deno.env.get("RETURNS_FROM_EMAIL") ?? "Returns <onboarding@resend.dev>";
+      const note = r.admin_notes ? `<p><strong>Note from our team:</strong> ${esc(r.admin_notes)}</p>` : "";
+      const html = `<p>Hello ${esc(r.customer_name)},</p><p>${msg}</p>
+<p>Order: <strong>${esc(r.order_reference)}</strong><br/>Product: ${esc(r.product_name)}</p>${note}
+<p>Reply to this email if you have any questions.</p>`;
+      const { data: d, error } = await admin.from("returns_emails").insert({
+        request_id: r.id, to_email: r.email, from_email: from,
+        subject: `Your return request ${r.order_reference}: ${r.status}`, html,
+      }).select("id").single();
+      if (error) return json({ error: error.message }, 500);
+      return json({ drafted: true, id: d.id });
+    }
+
+    // send a reviewed draft
+    if (!isId(body.email_id)) return json({ error: "email_id required" }, 400);
+    const { data: e } = await admin.from("returns_emails").select("*").eq("id", body.email_id).maybeSingle();
+    if (!e) return json({ error: "Not found" }, 404);
+    if (e.status === "sent") return json({ error: "Already sent" }, 409);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY || !RESEND_API_KEY) return json({ emailed: false, reason: "email not configured" });
+    if (!LOVABLE_API_KEY || !RESEND_API_KEY) return json({ sent: false, reason: "email not configured" });
 
-    const from = Deno.env.get("RETURNS_FROM_EMAIL") ?? "Returns <onboarding@resend.dev>";
-    const note = r.admin_notes ? `<p><strong>Note from our team:</strong> ${esc(r.admin_notes)}</p>` : "";
-    const html = `<p>Hello ${esc(r.customer_name)},</p><p>${msg}</p>
-      <p>Order: <strong>${esc(r.order_reference)}</strong><br/>Product: ${esc(r.product_name)}</p>${note}
-      <p>Reply to this email if you have any questions.</p>`;
-
-    await admin.from("audit_logs").insert({ action: "refund_email", actor_id: uid, data: { request_id: id, status: r.status } });
     const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${LOVABLE_API_KEY}`, "X-Connection-Api-Key": RESEND_API_KEY },
-      body: JSON.stringify({ from, to: [r.email], subject: `Your return request ${r.order_reference}: ${r.status}`, html }),
+      body: JSON.stringify({ from: e.from_email, to: [e.to_email], subject: e.subject, html: e.html }),
     });
     if (!res.ok) {
       const details = await res.text();
       console.error(`Resend failed [${res.status}]: ${details}`);
-      return json({ emailed: false, reason: "send failed", details }, 200);
+      await admin.from("returns_emails").update({ status: "failed", error: details.slice(0, 1000) }).eq("id", e.id);
+      return json({ sent: false, reason: "send failed", details });
     }
-    return json({ emailed: true });
-  } catch (e) {
-    return json({ error: (e as Error).message }, 500);
+    await admin.from("returns_emails").update({ status: "sent", error: null, sent_at: new Date().toISOString() }).eq("id", e.id);
+    await admin.from("audit_logs").insert({ action: "refund_email_sent", actor_id: uid, data: { email_id: e.id } });
+    return json({ sent: true });
+  } catch (err) {
+    return json({ error: (err as Error).message }, 500);
   }
 });

@@ -533,6 +533,56 @@ export type Database = {
         }
         Relationships: []
       }
+      returns_emails: {
+        Row: {
+          created_at: string
+          error: string | null
+          from_email: string
+          html: string
+          id: string
+          request_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          to_email: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          from_email: string
+          html: string
+          id?: string
+          request_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          to_email: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          from_email?: string
+          html?: string
+          id?: string
+          request_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          to_email?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_emails_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "refund_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancelled_at: string | null

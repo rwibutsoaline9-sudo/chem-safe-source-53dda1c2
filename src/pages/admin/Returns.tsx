@@ -53,9 +53,8 @@ export default function AdminReturns() {
 
   const notify = async (id: string) => {
     const { data, error } = await supabase.functions.invoke("notify-refund-decision", { body: { request_id: id } });
-    if (error) return toast.warning("Status saved, but the customer email could not be sent");
-    if (data?.emailed) toast.success("Customer emailed");
-    else if (data?.reason === "email not configured") toast.info("Status saved. Customer email isn't set up yet.");
+    if (error) return toast.warning("Status saved, but the email draft could not be created");
+    if (data?.drafted) toast.success("Email draft created — review it in Returns Emails");
   };
 
   const updateStatus = async (row: RefundRequest, status: Status) => {

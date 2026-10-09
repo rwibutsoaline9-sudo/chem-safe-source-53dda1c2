@@ -19,6 +19,7 @@ import Safety from "./pages/Safety";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import Returns from "./pages/Returns";
 import AdminReturns from "./pages/admin/Returns";
+import ReturnsEmails from "./pages/admin/ReturnsEmails";
 import TermsOfService from "./pages/TermsOfService";
 import Checkout from "./pages/Checkout";
 import RegionLanding from "./pages/RegionLanding";
@@ -93,6 +94,7 @@ const App = () => {
             <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
             <Route path="/admin/live-chat" element={<ProtectedRoute><AdminLiveChat /></ProtectedRoute>} />
             <Route path="/admin/returns" element={<ProtectedRoute><AdminReturns /></ProtectedRoute>} />
+            <Route path="/admin/returns-emails" element={<ProtectedRoute><ReturnsEmails /></ProtectedRoute>} />
             <Route path="/admin/image-similarity" element={<ProtectedRoute><ImageSimilarity /></ProtectedRoute>} />
             
             {/* 404 */}

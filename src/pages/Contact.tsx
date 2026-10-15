@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, CreditCard, Mail, MapPin, MessageCircle, Phone, Plus, Trash2, Upload } from "lucide-react";
+import ProductSearchSelect from "@/components/ProductSearchSelect";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,6 +18,8 @@ interface DBProduct {
   price_value: number;
   price_unit: string;
   price_currency: string;
+  image_url: string | null;
+  category: string | null;
 }
 
 export interface QuoteLine {
@@ -53,7 +55,7 @@ const Contact = () => {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, price_value, price_unit, price_currency")
+        .select("id, name, price_value, price_unit, price_currency, image_url, category")
         .order("name");
       if (data) setProducts(data);
     };
@@ -234,21 +236,12 @@ const QuoteForm = ({
             return (
               <div key={idx} className="grid grid-cols-[1fr_7rem_auto] gap-2 items-start">
                 <div>
-                  <Select
+                  <ProductSearchSelect
+                    products={products}
                     value={item.productId}
-                    onValueChange={(id) => setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, productId: id } : it)))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.filter((x) => !usedIds.includes(x.id)).map((x) => (
-                        <SelectItem key={x.id} value={x.id}>
-                          {x.name} — ${x.price_value.toLocaleString()}/{x.price_unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    excludeIds={usedIds}
+                    onSelect={(id) => setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, productId: id } : it)))}
+                  />
                   {p && <p className="text-xs text-muted-foreground mt-1">Unit: {p.price_unit}</p>}
                 </div>
                 <Input

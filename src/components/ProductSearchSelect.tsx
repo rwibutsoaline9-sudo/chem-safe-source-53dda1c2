@@ -13,8 +13,12 @@ export interface SearchableProduct {
   price_unit: string;
   price_currency: string;
   image_url?: string | null;
+  image_urls?: string[] | null;
   category?: string | null;
 }
+
+const thumbFor = (p: SearchableProduct) =>
+  p.image_urls?.[0] ?? p.image_url ?? getProductImage(null, p.category ?? null, p.name);
 
 interface Props {
   products: SearchableProduct[];

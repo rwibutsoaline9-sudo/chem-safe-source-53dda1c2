@@ -55,7 +55,7 @@ const Contact = () => {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, price_value, price_unit, price_currency, image_url, category")
+        .select("id, name, price_value, price_unit, price_currency, image_url, image_urls, category")
         .order("name");
       if (data) setProducts(data);
     };

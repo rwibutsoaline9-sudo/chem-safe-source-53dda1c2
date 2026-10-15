@@ -18,7 +18,7 @@ export interface SearchableProduct {
 }
 
 const thumbFor = (p: SearchableProduct) =>
-  p.image_urls?.[0] ?? p.image_url ?? getProductImage(null, p.category ?? null, p.name);
+  getProductImage(p.image_urls?.[0] ?? p.image_url ?? null, p.category ?? "", p.name);
 
 interface Props {
   products: SearchableProduct[];

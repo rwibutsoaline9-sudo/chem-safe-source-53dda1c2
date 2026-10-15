@@ -46,7 +46,7 @@ const ProductSearchSelect = ({ products, value, excludeIds = [], onSelect }: Pro
           {selected ? (
             <span className="flex items-center gap-2 min-w-0">
               <img
-                src={selected.image_url || getProductImage(null, selected.category ?? null, selected.name)}
+                src={thumbFor(selected)}
                 alt=""
                 className="w-8 h-8 rounded object-cover shrink-0 bg-muted"
               />
@@ -77,7 +77,7 @@ const ProductSearchSelect = ({ products, value, excludeIds = [], onSelect }: Pro
                   className="flex items-center gap-3 py-2"
                 >
                   <img
-                    src={p.image_url || getProductImage(null, p.category ?? null, p.name)}
+                    src={thumbFor(p)}
                     alt=""
                     className="w-10 h-10 rounded object-cover shrink-0 bg-muted"
                   />

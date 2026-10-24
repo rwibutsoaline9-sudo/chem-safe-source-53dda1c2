@@ -2,6 +2,11 @@ import type React from "react";
 import productUrea from "@/assets/product-urea.jpg";
 import productSodiumCyanide from "@/assets/product-sodium-cyanide.jpg";
 import productCausticSoda from "@/assets/product-caustic-soda.jpg";
+import productAcetone from "@/assets/product-acetone.jpg";
+import productAcetonitrile from "@/assets/product-acetonitrile.jpg";
+import productAmmoniumPersulfate from "@/assets/product-ammonium-persulfate.jpg";
+import productAmmoniumPhosphate from "@/assets/product-ammonium-phosphate.jpg";
+import productAniline from "@/assets/product-aniline.jpg";
 import sceneDrums from "@/assets/scene-drums.jpg";
 import scenePowder from "@/assets/scene-powder.jpg";
 import sceneCrystals from "@/assets/scene-crystals.jpg";
@@ -50,6 +55,11 @@ const exactProductAssets: Array<[RegExp, string]> = [
   [/^urea\b|urea technical grade/i, productUrea],
   [/^sodium cyanide$/i, productSodiumCyanide],
   [/caustic soda flakes|sodium hydroxide pellets/i, productCausticSoda],
+  [/^acetone$/i, productAcetone],
+  [/^acetonitrile$/i, productAcetonitrile],
+  [/^ammonium persulfate/i, productAmmoniumPersulfate],
+  [/^ammonium phosphate/i, productAmmoniumPhosphate],
+  [/^aniline$/i, productAniline],
 ];
 
 type SceneType =

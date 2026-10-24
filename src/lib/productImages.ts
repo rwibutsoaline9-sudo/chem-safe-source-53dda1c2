@@ -7,6 +7,14 @@ import productAcetonitrile from "@/assets/product-acetonitrile.jpg";
 import productAmmoniumPersulfate from "@/assets/product-ammonium-persulfate.jpg";
 import productAmmoniumPhosphate from "@/assets/product-ammonium-phosphate.jpg";
 import productAniline from "@/assets/product-aniline.jpg";
+import productNaohPellets from "@/assets/product-sodium-hydroxide-pellets.jpg";
+import productSulfuricAcid from "@/assets/product-sulfuric-acid.jpg";
+import productHydrochloricAcid from "@/assets/product-hydrochloric-acid.jpg";
+import productMethanol from "@/assets/product-methanol.jpg";
+import productEthanol from "@/assets/product-ethanol.jpg";
+import productNitricAcid from "@/assets/product-nitric-acid.jpg";
+import productAmmoniumNitrate from "@/assets/product-ammonium-nitrate.jpg";
+import productPotassiumPermanganate from "@/assets/product-potassium-permanganate.jpg";
 import sceneDrums from "@/assets/scene-drums.jpg";
 import scenePowder from "@/assets/scene-powder.jpg";
 import sceneCrystals from "@/assets/scene-crystals.jpg";
@@ -54,12 +62,20 @@ function isGenericImageUrl(imageUrl: string | null): boolean {
 const exactProductAssets: Array<[RegExp, string]> = [
   [/^urea\b|urea technical grade/i, productUrea],
   [/^sodium cyanide$/i, productSodiumCyanide],
-  [/caustic soda flakes|sodium hydroxide pellets/i, productCausticSoda],
+  [/caustic soda flakes/i, productCausticSoda],
+  [/sodium hydroxide pellets/i, productNaohPellets],
   [/^acetone$/i, productAcetone],
   [/^acetonitrile$/i, productAcetonitrile],
   [/^ammonium persulfate/i, productAmmoniumPersulfate],
   [/^ammonium phosphate/i, productAmmoniumPhosphate],
   [/^aniline$/i, productAniline],
+  [/^sulfuric acid/i, productSulfuricAcid],
+  [/^hydrochloric acid/i, productHydrochloricAcid],
+  [/^methanol/i, productMethanol],
+  [/^ethanol/i, productEthanol],
+  [/^nitric acid/i, productNitricAcid],
+  [/^ammonium nitrate/i, productAmmoniumNitrate],
+  [/^potassium permanganate/i, productPotassiumPermanganate],
 ];
 
 type SceneType =
